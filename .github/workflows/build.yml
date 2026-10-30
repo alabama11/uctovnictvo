@@ -3,7 +3,6 @@ name: Zostavenie
 on:
   push:
     branches: [main]
-    tags: ['v*']
   pull_request:
   workflow_dispatch:
 
@@ -28,8 +27,8 @@ jobs:
 
       - name: Balík ZIP
         run: |
-          VERZIA="${GITHUB_REF_NAME#v}"
-          [[ "$GITHUB_REF_TYPE" == "tag" ]] || VERZIA="dev-${GITHUB_SHA::7}"
+          VERZIA=$(grep -oP '(?<=<Version>)[^<]+' src/Uctovnictvo.App/Uctovnictvo.App.csproj)
+          echo "VERZIA=${VERZIA}" >> "$GITHUB_ENV"
           rm -f publish/Uctovnictvo/*.pdb
           cp CITAJ-MA.txt publish/Uctovnictvo/
           (cd publish && zip -qr "../Uctovnictvo-${VERZIA}-win-x64.zip" Uctovnictvo)
@@ -40,10 +39,14 @@ jobs:
           name: Uctovnictvo-win-x64
           path: ${{ env.ZIP }}
 
+      # každý commit do main aktualizuje vydanie podľa verzie v Uctovnictvo.App.csproj
       - name: Vydanie (Release)
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ env.VERZIA }}
+          target_commitish: ${{ github.sha }}
+          name: Účtovníctvo ${{ env.VERZIA }}
           files: ${{ env.ZIP }}
           body: |
             **Spustenie:** stiahnite ZIP nižšie (Assets), rozbaľte ho (pravé tlačidlo → Extrahovať všetko…) a spustite `Uctovnictvo.exe`.
