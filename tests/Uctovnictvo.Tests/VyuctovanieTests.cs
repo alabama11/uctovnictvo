@@ -86,3 +86,21 @@ public class VyuctovanieTests
         Assert.Equal(new[] { "1", "2", "10", "A2", "A10" }, cisla);
     }
 }
+
+public class PdfTests
+{
+    [Fact]
+    public void Vytvori_pdf_pre_byt_3()
+    {
+        var (byty, kat) = Vzor.Dom();
+        var v = Vyuctovanie.Vypocitaj(Vzor.Rok, byty, kat);
+        var j = new UctovnaJednotka
+        {
+            Nazov = "Spoločenstvo SPIEŽOVEC DONOVALY", Ulica = "Mistríky 456", Obec = "Donovaly",
+            Iban = "SK5911000000002628782959", IbanFondOprav = "SK3112000000198742637541", Statutar = "Ing. Igor Voštinár",
+        };
+        var path = Environment.GetEnvironmentVariable("UCT_PDF_OUT") ?? Path.Combine(Path.GetTempPath(), "vyuct-byt3.pdf");
+        PdfVyuctovanie.Uloz(j, v.Byty.Where(b => b.Priestor.Cislo == "3"), new NastaveniaVyuctovania(new DateOnly(2026, 5, 26), "Na Donovaloch"), path);
+        Assert.True(new FileInfo(path).Length > 1000);
+    }
+}
