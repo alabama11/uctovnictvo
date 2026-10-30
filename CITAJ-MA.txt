@@ -1,0 +1,10 @@
+Účtovníctvo 0.1 – návod na spustenie
+
+1. Rozbaľte celý priečinok (napr. na Plochu alebo do C:\Programy\Uctovnictvo).
+2. Spustite Uctovnictvo.exe.
+3. Windows môže pri prvom spustení zobraziť modré okno „Systém Windows ochránil váš počítač“.
+   Program nie je digitálne podpísaný. Kliknite na „Ďalšie informácie“ a potom „Spustiť aj tak“.
+4. Na vyskúšanie: menu Pomocník > Vytvoriť ukážkové spoločenstvo.
+
+Údaje sa ukladajú do: Dokumenty\Uctovnictvo\uctovnictvo.db
+Zálohu urobíte cez menu Súbor > Zálohovať všetky údaje.
