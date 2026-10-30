@@ -1,0 +1,43 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:k="using:Uctovnictvo.App"
+        x:Class="Uctovnictvo.App.Views.ImportWindow"
+        Title="Import platieb z výpisu" Width="1150" Height="600" WindowStartupLocation="CenterOwner">
+  <DockPanel Margin="14">
+    <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,0,0,10"
+               Text="Skontrolujte priradenie platieb k bytom. Zaškrtnuté platby sa uložia do úhrad. Platby, ktoré už v evidencii sú, sú vopred odškrtnuté." />
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" Margin="0,10,0,0">
+      <Button Classes="hlavne" Click="Ok" IsDefault="True">Importovať označené</Button>
+      <Button Click="Zrus" IsCancel="True">Zrušiť</Button>
+    </StackPanel>
+    <DataGrid x:Name="Tabulka" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridCheckBoxColumn Header="Importovať" Binding="{Binding Importovat}" Width="95" />
+        <DataGridTextColumn Header="Dátum" Binding="{Binding Platba.Datum, Converter={StaticResource Datum}}" IsReadOnly="True" Width="100" />
+        <DataGridTextColumn Header="Suma €" Binding="{Binding Platba.Suma, Converter={StaticResource Eur}}" IsReadOnly="True" Width="95" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Platiteľ" Binding="{Binding Platba.Meno}" IsReadOnly="True" Width="150" />
+        <DataGridTextColumn Header="IBAN" Binding="{Binding Platba.Iban}" IsReadOnly="True" Width="210" />
+        <DataGridTextColumn Header="VS" Binding="{Binding Platba.VariabilnySymbol}" IsReadOnly="True" Width="70" />
+        <DataGridTextColumn Header="Zhoda" Binding="{Binding Dovod}" IsReadOnly="True" Width="160" />
+        <DataGridTemplateColumn Header="Byt" Width="120">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <ComboBox ItemsSource="{Binding $parent[Window].Priestory}" SelectedItem="{Binding Priestor}" HorizontalAlignment="Stretch" PlaceholderText="vyberte">
+                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Cislo, StringFormat='byt {0}'}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn Header="Účel" Width="*">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <ComboBox ItemsSource="{x:Static k:Zoznamy.Ucely}" SelectedItem="{Binding Ucel}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource EnumText}}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</Window>

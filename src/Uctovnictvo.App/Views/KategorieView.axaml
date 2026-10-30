@@ -1,0 +1,34 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:k="using:Uctovnictvo.App"
+             x:Class="Uctovnictvo.App.Views.KategorieView">
+  <DockPanel>
+    <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,4,0,8" MaxWidth="900" HorizontalAlignment="Left"
+               Text="Položky, ktoré spoločenstvo platí a rozpočítava na byty. Kľúč určuje, ako sa skutočný náklad domu rozdelí. Ak sa položka týka len niektorých bytov (napr. komíny), vpíšte ich čísla oddelené čiarkou. Fond opráv sa nevyúčtováva – za skutočný náklad bytu sa berie jeho predpis." />
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+      <Button Command="{Binding PridajKategoriuCommand}">+ Pridať položku</Button>
+      <Button Command="{Binding ZmazKategoriuCommand}">Zmazať vybranú</Button>
+      <Button Classes="hlavne" Command="{Binding PotvrdKategorieCommand}">Uložiť a použiť zmeny</Button>
+    </StackPanel>
+    <DataGrid ItemsSource="{Binding Kategorie}" SelectedItem="{Binding VybranaKategoria}" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Poradie" Binding="{Binding Poradie}" Width="80" />
+        <DataGridTextColumn Header="Názov položky" Binding="{Binding Nazov}" Width="2*" />
+        <DataGridTemplateColumn Header="Kľúč rozpočtu" Width="260">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate><TextBlock Margin="8,0" VerticalAlignment="Center" Text="{Binding Kluc, Converter={StaticResource EnumText}}" /></DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+          <DataGridTemplateColumn.CellEditingTemplate>
+            <DataTemplate>
+              <ComboBox ItemsSource="{x:Static k:Zoznamy.Kluce}" SelectedItem="{Binding Kluc}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource EnumText}}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellEditingTemplate>
+        </DataGridTemplateColumn>
+        <DataGridCheckBoxColumn Header="Fond opráv" Binding="{Binding JeFondOprav}" Width="100" />
+        <DataGridTextColumn Header="Len pre priestory (napr. 42, 50, 52)" Binding="{Binding LenPriestory}" Width="*" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

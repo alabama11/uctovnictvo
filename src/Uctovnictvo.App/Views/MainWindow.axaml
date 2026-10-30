@@ -1,0 +1,98 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="using:Uctovnictvo.App.Views"
+        xmlns:k="using:Uctovnictvo.App"
+        x:Class="Uctovnictvo.App.Views.MainWindow"
+        Title="Účtovníctvo" Width="1320" Height="820" MinWidth="980" MinHeight="600"
+        Icon="/Assets/ikona.ico" WindowStartupLocation="CenterScreen">
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+S" Command="{Binding UlozCommand}" />
+  </Window.KeyBindings>
+  <DockPanel>
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_Súbor">
+        <MenuItem Header="_Uložiť" InputGesture="Ctrl+S" Command="{Binding UlozCommand}" />
+        <Separator />
+        <MenuItem Header="_Zálohovať všetky údaje…" Command="{Binding ZalohujCommand}" />
+        <MenuItem Header="_Obnoviť zo zálohy…" Command="{Binding ObnovCommand}" />
+        <MenuItem Header="Otvoriť _priečinok s údajmi" Click="OtvorPriecinok" />
+        <Separator />
+        <MenuItem Header="_Koniec" Click="Koniec" />
+      </MenuItem>
+      <MenuItem Header="_Pomocník">
+        <MenuItem Header="Vytvoriť _ukážkové spoločenstvo" Command="{Binding VytvorUkazkuCommand}" />
+        <Separator />
+        <MenuItem Header="_O programe" Click="OProgramme" />
+      </MenuItem>
+    </Menu>
+
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" BorderBrush="#D5DCE3" BorderThickness="0,1,0,0" Padding="10,4">
+      <TextBlock Text="{Binding Stav}" FontSize="12" Foreground="#4A5560" />
+    </Border>
+
+    <Border DockPanel.Dock="Left" Width="260" Background="#F6F8FA" BorderBrush="#D5DCE3" BorderThickness="0,0,1,0">
+      <DockPanel Margin="10">
+        <TextBlock DockPanel.Dock="Top" Text="Firmy a spoločenstvá" FontWeight="SemiBold" Margin="2,4,0,8" />
+        <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,10,0,0">
+          <Button HorizontalAlignment="Stretch" Command="{Binding PridajSpolocenstvoCommand}">+ Spoločenstvo vlastníkov</Button>
+          <Button HorizontalAlignment="Stretch" Command="{Binding PridajFirmuCommand}">+ Firma (SZČO / s.r.o.)</Button>
+          <Button HorizontalAlignment="Stretch" Command="{Binding ZmazJednotkuCommand}" Foreground="#A02020">Zmazať vybranú</Button>
+        </StackPanel>
+        <ListBox ItemsSource="{Binding Jednotky}" SelectedItem="{Binding VybranaJednotka}" Background="Transparent">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,2">
+                <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Typ, Converter={StaticResource EnumText}}" FontSize="12" Foreground="#6A7580" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Border>
+
+    <Panel Margin="14,10,14,8">
+      <StackPanel IsVisible="{Binding NemaJednotku}" VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="520" Spacing="10">
+        <TextBlock Classes="nadpis" Text="Vitajte" />
+        <TextBlock Classes="popis" Text="Začnite pridaním spoločenstva vlastníkov alebo firmy tlačidlom vľavo dole. Všetky údaje sa ukladajú do súboru v priečinku Dokumenty\Uctovnictvo; zálohu urobíte cez menu Súbor." />
+      </StackPanel>
+
+      <DockPanel IsVisible="{Binding MaJednotku}">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+          <TextBlock Classes="nadpis" Text="{Binding VybranaJednotka.Nazov}" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" IsVisible="{Binding JeSpolocenstvo}">
+            <TextBlock Classes="stitok" Text="Rok:" FontWeight="SemiBold" />
+            <NumericUpDown Value="{Binding Rok}" Minimum="2000" Maximum="2100" Increment="1" FormatString="0" Width="130" />
+            <Button Command="{Binding UlozCommand}">Uložiť</Button>
+          </StackPanel>
+        </Grid>
+        <TabControl x:Name="Zalozky" Padding="0,6,0,0">
+          <TabItem Header="Údaje">
+            <v:UdajeView />
+          </TabItem>
+          <TabItem Header="Byty a vlastníci" IsVisible="{Binding JeSpolocenstvo}">
+            <v:PriestoryView />
+          </TabItem>
+          <TabItem Header="Položky nákladov" IsVisible="{Binding JeSpolocenstvo}">
+            <v:KategorieView />
+          </TabItem>
+          <TabItem Header="Predpisy a odpočty" IsVisible="{Binding JeSpolocenstvo}">
+            <v:RokView />
+          </TabItem>
+          <TabItem Header="Úhrady" IsVisible="{Binding JeSpolocenstvo}">
+            <v:UhradyView />
+          </TabItem>
+          <TabItem Header="Vyúčtovanie" IsVisible="{Binding JeSpolocenstvo}">
+            <v:VyuctovanieView />
+          </TabItem>
+          <TabItem Header="Faktúry a účtovníctvo" IsVisible="{Binding JeFirma}">
+            <StackPanel Margin="4,10" Spacing="8" MaxWidth="640" HorizontalAlignment="Left">
+              <TextBlock Classes="nadpis" Text="Pripravuje sa" />
+              <TextBlock Classes="popis" Text="Vystavovanie faktúr pribudne vo fáze 2, jednoduché účtovníctvo / daňová evidencia vo fáze 3 a podvojné účtovníctvo s daňovými priznaniami vo fázach 4 a 5. Údaje firmy, ktoré zadáte teraz, sa v nich použijú." />
+            </StackPanel>
+          </TabItem>
+        </TabControl>
+      </DockPanel>
+    </Panel>
+  </DockPanel>
+</Window>

@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:k="using:Uctovnictvo.App"
+             x:Class="Uctovnictvo.App.Views.RokView">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,4,0,6">
+      <TextBlock Classes="popis" VerticalAlignment="Center" Text="{Binding Rok, StringFormat='Údaje za rok {0}. Rok zmeníte vpravo hore.'}" />
+      <Button Command="{Binding KopirujZMinulehoRokaCommand}" ToolTip.Tip="Predpisy, poistné, konečné stavy vodomerov a výsledok vyúčtovania minulého roka">Prevziať z minulého roka…</Button>
+    </StackPanel>
+    <TabControl>
+      <TabItem Header="Predpisy záloh">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,4,0,8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="stitok" Text="Hromadne nastaviť:" FontWeight="SemiBold" />
+              <ComboBox ItemsSource="{Binding Kategorie}" SelectedItem="{Binding HromadnaKategoria}" Width="260">
+                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+              <TextBox Text="{Binding HromadnaSadzba, Converter={StaticResource Eur}}" Width="100" />
+              <RadioButton GroupName="sadzba" IsChecked="{Binding HromadnePodlaPlochy}" Content="€ za m² ročne" />
+              <RadioButton GroupName="sadzba" Content="€ na byt ročne" />
+              <Button Command="{Binding NastavPredpisHromadneCommand}">Nastaviť všetkým</Button>
+            </StackPanel>
+          </Border>
+          <TextBlock DockPanel.Dock="Bottom" Classes="popis" Margin="0,6,0,0" Text="Sumy sú ročné. Mesačná platba = súčet / 12. Poistné sa zadáva v záložke Odpočty vody a poistné." />
+          <DataGrid x:Name="Predpisy" ItemsSource="{Binding PredpisRiadky}" AutoGenerateColumns="False" FrozenColumnCount="2" />
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Odpočty vody a poistné">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,4,0,8" Text="Dátum zadávajte v tvare 10.1.2025. Zostatok minulého roka: + preplatok, − nedoplatok (prevezme sa aj automaticky tlačidlom hore)." />
+          <DataGrid ItemsSource="{Binding RokRiadky}" AutoGenerateColumns="False" FrozenColumnCount="2">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Byt" Binding="{Binding Priestor.Cislo}" IsReadOnly="True" Width="64" />
+              <DataGridTextColumn Header="Vlastník" Binding="{Binding Priestor.MenaVlastnikov}" IsReadOnly="True" Width="200" />
+              <DataGridTextColumn Header="Odpočet od" Binding="{Binding DatumZaciatok, Converter={StaticResource Datum}}" Width="110" />
+              <DataGridTextColumn Header="Stav m³" Binding="{Binding StavZaciatok, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Odpočet do" Binding="{Binding DatumKoniec, Converter={StaticResource Datum}}" Width="110" />
+              <DataGridTextColumn Header="Stav m³" Binding="{Binding StavKoniec, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Spotreba m³" Binding="{Binding Spotreba, Converter={StaticResource M3}}" IsReadOnly="True" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Poistné – predpis €" Binding="{Binding PoistnePredpis, Converter={StaticResource Eur}}" Width="150" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Zostatok min. roka €" Binding="{Binding ZostatokMinulyRok, Converter={StaticResource Eur}}" Width="160" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Náklady domu">
+        <DockPanel>
+          <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,4,0,8" Text="Skutočne zaplatené náklady celého domu za rok podľa faktúr. Tieto sumy sa rozpočítajú na byty pri vyúčtovaní." />
+          <DataGrid ItemsSource="{Binding NakladRiadky}" AutoGenerateColumns="False" HorizontalAlignment="Left" Width="820">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Položka" Binding="{Binding Nazov}" IsReadOnly="True" Width="320" />
+              <DataGridTextColumn Header="Rozpočítava sa" Binding="{Binding Kluc}" IsReadOnly="True" Width="300" />
+              <DataGridTextColumn Header="Náklad za rok €" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="*" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</UserControl>

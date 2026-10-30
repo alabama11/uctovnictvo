@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:k="using:Uctovnictvo.App"
+             x:Class="Uctovnictvo.App.Views.PriestoryView">
+  <Grid RowDefinitions="Auto,*,Auto,240">
+    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,8">
+      <Button Command="{Binding PridajPriestorCommand}">+ Pridať byt / priestor</Button>
+      <Button Command="{Binding ZmazPriestorCommand}">Zmazať vybraný</Button>
+      <Button Command="{Binding PodielyZPlochyCommand}" ToolTip.Tip="Podiel = plocha bytu × 100 / súčet plôch všetkých bytov × 100">Prepočítať podiely z plochy</Button>
+      <TextBlock Classes="popis" VerticalAlignment="Center" Text="{Binding Priestory.Count, StringFormat='Počet priestorov: {0}'}" Margin="10,0" />
+    </StackPanel>
+    <DataGrid Grid.Row="1" ItemsSource="{Binding Priestory}" SelectedItem="{Binding VybranyPriestor}" AutoGenerateColumns="False" FrozenColumnCount="1">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Číslo" Binding="{Binding Cislo}" Width="76" />
+        <DataGridTemplateColumn Header="Typ" Width="150">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate><TextBlock Margin="8,0" VerticalAlignment="Center" Text="{Binding Typ, Converter={StaticResource EnumText}}" /></DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+          <DataGridTemplateColumn.CellEditingTemplate>
+            <DataTemplate>
+              <ComboBox ItemsSource="{x:Static k:Zoznamy.TypyPriestorov}" SelectedItem="{Binding Typ}" HorizontalAlignment="Stretch">
+                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource EnumText}}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellEditingTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTextColumn Header="Vchod" Binding="{Binding Vchod}" Width="76" />
+        <DataGridTextColumn Header="Poschodie" Binding="{Binding Poschodie}" Width="90" />
+        <DataGridTextColumn Header="Plocha m²" Binding="{Binding Plocha, Converter={StaticResource Eur}}" Width="100" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Balkón m²" Binding="{Binding PlochaBalkona, Converter={StaticResource Eur}}" Width="100" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Osoby" Binding="{Binding PocetOsob}" Width="76" />
+        <DataGridTextColumn Header="Podiel" Binding="{Binding PodielCitatel}" Width="85" />
+        <DataGridTextColumn Header="/ z celku" Binding="{Binding PodielMenovatel}" Width="95" />
+        <DataGridTextColumn Header="VS" Binding="{Binding VariabilnySymbol}" Width="80" />
+        <DataGridTextColumn Header="Č. vodomeru" Binding="{Binding CisloVodomeru}" Width="120" />
+        <DataGridTextColumn Header="Vlastníci" Binding="{Binding MenaVlastnikov}" IsReadOnly="True" Width="220" />
+        <DataGridTextColumn Header="Poznámka" Binding="{Binding Poznamka}" Width="*" />
+      </DataGrid.Columns>
+    </DataGrid>
+    <GridSplitter Grid.Row="2" Height="6" Background="Transparent" ResizeDirection="Rows" />
+    <Grid Grid.Row="3" ColumnDefinitions="3*,12,2*">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,6">
+          <TextBlock FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding VybranyPriestor.Cislo, StringFormat='Vlastníci priestoru {0}'}" />
+          <Button Command="{Binding PridajVlastnikaCommand}">+ Vlastník</Button>
+          <Button Command="{Binding ZmazVlastnikaCommand}">Zmazať</Button>
+        </StackPanel>
+        <DataGrid ItemsSource="{Binding Vlastnici}" SelectedItem="{Binding VybranyVlastnik}" AutoGenerateColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Meno a priezvisko / názov" Binding="{Binding Meno}" Width="2*" />
+            <DataGridTextColumn Header="Ulica" Binding="{Binding Ulica}" Width="*" />
+            <DataGridTextColumn Header="Obec" Binding="{Binding Obec}" Width="*" />
+            <DataGridTextColumn Header="PSČ" Binding="{Binding Psc}" Width="70" />
+            <DataGridTextColumn Header="E-mail" Binding="{Binding Email}" Width="*" />
+            <DataGridTextColumn Header="Telefón" Binding="{Binding Telefon}" Width="110" />
+            <DataGridCheckBoxColumn Header="Kontakt" Binding="{Binding Hlavny}" Width="75" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </DockPanel>
+      <DockPanel Grid.Column="2">
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,6">
+          <TextBlock FontWeight="SemiBold" VerticalAlignment="Center" Text="Účty, z ktorých platí" />
+          <Button Command="{Binding PridajUcetCommand}">+ Účet</Button>
+          <Button Command="{Binding ZmazUcetCommand}">Zmazať</Button>
+        </StackPanel>
+        <DataGrid ItemsSource="{Binding Ucty}" SelectedItem="{Binding VybranyUcet}" AutoGenerateColumns="False">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="IBAN" Binding="{Binding Iban}" Width="2*" />
+            <DataGridTextColumn Header="Kontrola" Binding="{Binding Iban, Converter={x:Static k:IbanKontrolaPrevodnik.Instance}}" IsReadOnly="True" Width="90" />
+            <DataGridTextColumn Header="Poznámka" Binding="{Binding Poznamka}" Width="*" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </DockPanel>
+    </Grid>
+  </Grid>
+</UserControl>

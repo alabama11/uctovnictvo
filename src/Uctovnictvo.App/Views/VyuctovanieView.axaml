@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.VyuctovanieView">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,4,0,8">
+      <Button Classes="hlavne" Command="{Binding VypocitajCommand}">Vypočítať vyúčtovanie</Button>
+      <TextBlock Classes="stitok" Text="Miesto:" Margin="10,0,0,0" />
+      <TextBox Text="{Binding MiestoVystavenia}" Width="150" />
+      <TextBlock Classes="stitok" Text="Dátum:" />
+      <TextBox Text="{Binding DatumVystavenia, Converter={StaticResource Datum}}" Width="105" />
+      <Button Command="{Binding PdfVsetkyCommand}">PDF – všetky byty…</Button>
+      <Button Command="{Binding PdfVybranyCommand}">PDF – vybraný byt…</Button>
+      <Button Command="{Binding ExcelVyuctovanieCommand}">Excel…</Button>
+    </StackPanel>
+    <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Upozornenia}" Margin="0,6,0,0">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate><TextBlock Text="{Binding StringFormat='⚠ {0}'}" Foreground="#9A5B00" TextWrapping="Wrap" /></DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <TextBlock DockPanel.Dock="Bottom" Text="{Binding SumaVyuctovania}" FontWeight="SemiBold" Margin="0,6,0,0" />
+    <DataGrid ItemsSource="{Binding VyuctovanieBytov}" SelectedItem="{Binding VybraneVyuctovanie}" AutoGenerateColumns="False" IsReadOnly="True" FrozenColumnCount="2">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Byt" Binding="{Binding Priestor.Cislo}" Width="64" />
+        <DataGridTextColumn Header="Vlastník" Binding="{Binding Priestor.MenaVlastnikov}" Width="170" />
+        <DataGridTextColumn Header="Predpis" Binding="{Binding PredpisZaloh, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Zaplatené" Binding="{Binding ZaplateneZalohy, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Skutočné" Binding="{Binding SkutocneSpolu, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Nedopl. zálohy" Binding="{Binding NedoplatokNaZalohach, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Za náklady" Binding="{Binding VysledokNakladov, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Min. rok" Binding="{Binding RozdielMinulyRok, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Poistné" Binding="{Binding RozdielPoistne, Converter={StaticResource Eur}}" Width="90" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Výsledok (+ prepl. / − dopl.)" Binding="{Binding Vysledok, Converter={StaticResource Eur}}" Width="*" FontWeight="SemiBold" CellStyleClasses="cislo" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>
