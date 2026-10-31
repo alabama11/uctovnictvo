@@ -7,7 +7,10 @@
       <Button Command="{Binding PridajPriestorCommand}">+ Pridať byt / priestor</Button>
       <Button Command="{Binding ZmazPriestorCommand}">Zmazať vybraný</Button>
       <Button Command="{Binding PodielyZPlochyCommand}" ToolTip.Tip="Podiel = plocha bytu × 100 / súčet plôch všetkých bytov × 100">Prepočítať podiely z plochy</Button>
-      <TextBlock Classes="popis" VerticalAlignment="Center" Text="{Binding Priestory.Count, StringFormat='Počet priestorov: {0}'}" Margin="10,0" />
+      <Button Command="{Binding SablonaExcelCommand}" ToolTip.Tip="Excel so všetkými bytmi, vlastníkmi a predpismi – dá sa upraviť a naimportovať späť">Export / šablóna Excel…</Button>
+      <Button Command="{Binding ImportZExceluCommand}">Import z Excelu…</Button>
+      <Button Command="{Binding PrezencnaListinaCommand}">Prezenčná listina…</Button>
+      <TextBlock Classes="popis" VerticalAlignment="Center" Text="{Binding Priestory.Count, StringFormat='Počet: {0}'}" Margin="10,0" />
     </StackPanel>
     <DataGrid Grid.Row="1" ItemsSource="{Binding Priestory}" SelectedItem="{Binding VybranyPriestor}" AutoGenerateColumns="False" FrozenColumnCount="1">
       <DataGrid.Columns>
@@ -54,6 +57,8 @@
             <DataGridTextColumn Header="E-mail" Binding="{Binding Email}" Width="*" />
             <DataGridTextColumn Header="Telefón" Binding="{Binding Telefon}" Width="110" />
             <DataGridCheckBoxColumn Header="Kontakt" Binding="{Binding Hlavny}" Width="75" />
+            <DataGridTextColumn Header="Vlastník od" Binding="{Binding VlastnikOd, Converter={StaticResource Datum}}" Width="100" />
+            <DataGridTextColumn Header="Vlastník do" Binding="{Binding VlastnikDo, Converter={StaticResource Datum}}" Width="100" />
           </DataGrid.Columns>
         </DataGrid>
       </DockPanel>

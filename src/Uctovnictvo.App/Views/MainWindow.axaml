@@ -17,6 +17,9 @@
         <MenuItem Header="_Obnoviť zo zálohy…" Command="{Binding ObnovCommand}" />
         <MenuItem Header="Otvoriť _priečinok s údajmi" Click="OtvorPriecinok" />
         <Separator />
+        <MenuItem Header="Nastavenia _e-mailu…" Click="NastaveniaEmailu" />
+        <MenuItem Header="_Automatické zálohy…" Click="NastaveniaZaloh" />
+        <Separator />
         <MenuItem Header="_Koniec" Click="Koniec" />
       </MenuItem>
       <MenuItem Header="_Pomocník">
@@ -82,8 +85,14 @@
           <TabItem Header="Úhrady" IsVisible="{Binding JeSpolocenstvo}">
             <v:UhradyView />
           </TabItem>
+          <TabItem Header="Konto a upomienky" IsVisible="{Binding JeSpolocenstvo}">
+            <v:KontoView />
+          </TabItem>
           <TabItem Header="Vyúčtovanie" IsVisible="{Binding JeSpolocenstvo}">
             <v:VyuctovanieView />
+          </TabItem>
+          <TabItem Header="Fond opráv" IsVisible="{Binding JeSpolocenstvo}">
+            <v:FondView />
           </TabItem>
           <TabItem Header="Faktúry a účtovníctvo" IsVisible="{Binding JeFirma}">
             <StackPanel Margin="4,10" Spacing="8" MaxWidth="640" HorizontalAlignment="Left">

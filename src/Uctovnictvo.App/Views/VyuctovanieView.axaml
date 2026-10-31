@@ -11,6 +11,9 @@
       <Button Command="{Binding PdfVsetkyCommand}">PDF – všetky byty…</Button>
       <Button Command="{Binding PdfVybranyCommand}">PDF – vybraný byt…</Button>
       <Button Command="{Binding ExcelVyuctovanieCommand}">Excel…</Button>
+      <Button Command="{Binding VyuctovanieEmailCommand}" IsEnabled="{Binding !Odosiela}">Poslať e-mailom…</Button>
+      <Button Command="{Binding RocnaSpravaCommand}">Správa o hospodárení…</Button>
+      <Button Command="{Binding NavrhniZalohyCommand}" ToolTip.Tip="Predpisy na budúci rok podľa skutočných nákladov tohto roka">Zálohy na ďalší rok…</Button>
     </StackPanel>
     <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Upozornenia}" Margin="0,6,0,0">
       <ItemsControl.ItemTemplate>
@@ -21,7 +24,7 @@
     <DataGrid ItemsSource="{Binding VyuctovanieBytov}" SelectedItem="{Binding VybraneVyuctovanie}" AutoGenerateColumns="False" IsReadOnly="True" FrozenColumnCount="2">
       <DataGrid.Columns>
         <DataGridTextColumn Header="Byt" Binding="{Binding Priestor.Cislo}" Width="64" />
-        <DataGridTextColumn Header="Vlastník" Binding="{Binding Priestor.MenaVlastnikov}" Width="170" />
+        <DataGridTextColumn Header="Vlastník" Binding="{Binding Vlastnik}" Width="170" />
         <DataGridTextColumn Header="Predpis" Binding="{Binding PredpisZaloh, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
         <DataGridTextColumn Header="Zaplatené" Binding="{Binding ZaplateneZalohy, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />
         <DataGridTextColumn Header="Skutočné" Binding="{Binding SkutocneSpolu, Converter={StaticResource Eur}}" Width="105" CellStyleClasses="cislo" />

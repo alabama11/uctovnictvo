@@ -79,6 +79,8 @@ public partial class RokRiadok : ObservableObject
     public DateOnly? DatumKoniec { get => Data.DatumOdpoctuKoniec; set { Data.DatumOdpoctuKoniec = value; OnPropertyChanged(); } }
     public decimal? StavZaciatok { get => Data.StavVodomeruZaciatok; set { Data.StavVodomeruZaciatok = value; OnPropertyChanged(); OnPropertyChanged(nameof(Spotreba)); } }
     public decimal? StavKoniec { get => Data.StavVodomeruKoniec; set { Data.StavVodomeruKoniec = value; OnPropertyChanged(); OnPropertyChanged(nameof(Spotreba)); } }
+    /// <summary>Spotreba na vodomere, ktorý sa počas roka vymenil.</summary>
+    public decimal SpotrebaVymeneny { get => Data.SpotrebaVymenenyVodomer; set { Data.SpotrebaVymenenyVodomer = value; OnPropertyChanged(); OnPropertyChanged(nameof(Spotreba)); } }
     public decimal Spotreba => Data.SpotrebaVody;
     public decimal PoistnePredpis { get => Data.PoistnePredpis; set { Data.PoistnePredpis = value; OnPropertyChanged(); } }
     public decimal ZostatokMinulyRok { get => Data.ZostatokMinulyRok; set { Data.ZostatokMinulyRok = value; OnPropertyChanged(); } }

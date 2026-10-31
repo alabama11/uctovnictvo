@@ -31,7 +31,7 @@ public static class ExportExcel
             r++;
             int c = 1;
             ws.Cell(r, c++).Value = b.Priestor.Cislo;
-            ws.Cell(r, c++).Value = b.Priestor.MenaVlastnikov;
+            ws.Cell(r, c++).Value = b.Vlastnik + (b.JeCastRoka ? $" ({b.ObdobieOd:d.M.} – {b.ObdobieDo:d.M.})" : "");
             ws.Cell(r, c++).Value = b.Priestor.Plocha;
             ws.Cell(r, c++).Value = b.Voda?.Spotreba ?? 0m;
             foreach (var p in b.Polozky) ws.Cell(r, c++).Value = p.Skutocne;

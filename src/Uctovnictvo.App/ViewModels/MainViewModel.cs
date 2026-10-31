@@ -16,6 +16,9 @@ public interface IDialogy
     Task Sprava(string titulok, string text);
     Task<bool> Potvrd(string titulok, string text);
     Task<bool> ImportPlatieb(IReadOnlyList<ImportRiadok> riadky, IReadOnlyList<Priestor> priestory);
+    /// <summary>Zobrazí predmet a text e-mailu na úpravu; null = zrušené.</summary>
+    Task<(string Predmet, string Text)?> TextEmailu(string titulok, string info, string predmet, string text);
+    Task<string?> VstupnyText(string titulok, string otazka, string predvolene);
 }
 
 public partial class MainViewModel : ObservableObject
@@ -177,6 +180,7 @@ public partial class MainViewModel : ObservableObject
         foreach (var k in Kategorie)
             NakladRiadky.Add(new NakladRiadok(db, k, Rok));
         NacitajUhrady();
+        NacitajKontoAFond();
         KategorieZmenene?.Invoke();
     }
 
