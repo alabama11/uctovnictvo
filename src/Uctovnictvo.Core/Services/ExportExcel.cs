@@ -255,6 +255,25 @@ public static class ExportExcel
         wb.SaveAs(path);
     }
 
+    /// <summary>Podvojné účtovníctvo: účtovný denník, obratová predvaha, saldokonto, súvaha a výkaz ziskov a strát.</summary>
+    public static void Uctovnictvo(UctovnaJednotka j, int rok, IReadOnlyList<UctovnyZapis> zapisy, IReadOnlyList<ObratUctu> predvaha,
+        IReadOnlyList<SaldoRiadok> saldo, IReadOnlyList<RiadokVykazu> suvaha, IReadOnlyList<RiadokVykazu> vzas, string path)
+    {
+        using var wb = new XLWorkbook();
+        Harok(wb, "Súvaha", $"{j.Nazov} – súvaha k 31. 12. {rok} (Úč MÚJ 1-01)", new[] { "Označenie", "Text", "Č. r.", "Bežné obdobie", "Predchádzajúce obdobie" },
+            suvaha.Select(r => new object?[] { r.Oznacenie, r.Text, r.Riadok, r.Bezne, r.Minule }));
+        Harok(wb, "Výkaz ziskov a strát", $"{j.Nazov} – výkaz ziskov a strát {rok}", new[] { "Označenie", "Text", "Č. r.", "Bežné obdobie", "Predchádzajúce obdobie" },
+            vzas.Select(r => new object?[] { r.Oznacenie, r.Text, r.Riadok, r.Bezne, r.Minule }));
+        Harok(wb, "Predvaha", $"Obratová predvaha {rok}", new[] { "Účet", "Názov", "PS MD", "PS D", "Obrat MD", "Obrat D", "KS MD", "KS D", "Zostatok" },
+            predvaha.Select(o => new object?[] { o.Ucet, o.Nazov, o.PsMd, o.PsD, o.ObratMd, o.ObratD, o.KsMd, o.KsD, o.Zostatok })
+                .Append(new object?[] { "", "Spolu", predvaha.Sum(o => o.PsMd), predvaha.Sum(o => o.PsD), predvaha.Sum(o => o.ObratMd), predvaha.Sum(o => o.ObratD), predvaha.Sum(o => o.KsMd), predvaha.Sum(o => o.KsD), null }));
+        Harok(wb, "Denník", $"Účtovný denník {rok}", new[] { "Dátum", "Doklad", "Popis", "Partner", "MD", "D", "Suma" },
+            zapisy.Select(z => new object?[] { z.Datum, z.Doklad, z.Popis, z.Partner, z.Md, z.D, z.Suma }));
+        Harok(wb, "Saldokonto", $"Saldokonto k 31. 12. {rok}", new[] { "Partner", "Doklad", "Druh", "Splatná", "Suma", "Zostáva", "Dní po splatnosti" },
+            saldo.Select(r => new object?[] { r.Partner, r.Doklad, r.Druh == DruhFaktury.Vydana ? "pohľadávka" : "záväzok", r.Splatnost, r.Suma, r.Zostatok, r.DniPoSplatnosti }));
+        wb.SaveAs(path);
+    }
+
     public static string NazovUcelu(UcelUhrady u) => u switch
     {
         UcelUhrady.Zalohy => "zálohy",

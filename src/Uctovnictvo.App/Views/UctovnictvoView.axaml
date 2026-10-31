@@ -1,0 +1,139 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:k="using:Uctovnictvo.App"
+             x:Class="Uctovnictvo.App.Views.UctovnictvoView">
+  <DockPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding SuhrnUctovnictva}" FontWeight="SemiBold" TextWrapping="Wrap" />
+    </Border>
+    <TabControl Padding="0,8,0,0">
+      <TabItem Header="Denník">
+        <DockPanel>
+          <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <WrapPanel.Styles><Style Selector="Button, CheckBox"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+            <Button Classes="hlavne" Command="{Binding ZauctujDokladyCommand}" IsEnabled="{Binding RokOdomknuty}">Zaúčtovať doklady</Button>
+            <Button Command="{Binding PridajZapisCommand}" IsEnabled="{Binding RokOdomknuty}">+ Zápis</Button>
+            <Button Command="{Binding PridajPociatocnyStavCommand}" IsEnabled="{Binding RokOdomknuty}">+ Počiatočný stav</Button>
+            <Button Command="{Binding ZmazZapisCommand}" IsEnabled="{Binding RokOdomknuty}">Zmazať zápis</Button>
+            <Button Command="{Binding OtvoritRokCommand}" IsEnabled="{Binding RokOdomknuty}">Otvoriť rok z minulého roka…</Button>
+            <Button Command="{Binding UctovnyDennikPdfCommand}">Denník PDF…</Button>
+            <CheckBox IsChecked="{Binding RokUzamknuty}" Content="🔒 Uzamknúť rok" />
+          </WrapPanel>
+          <TextBlock DockPanel.Dock="Top" Classes="popis" TextWrapping="Wrap" Margin="0,0,0,8"
+                     Text="„Zaúčtovať doklady“ vytvorí zápisy z faktúr, banky, pokladne a odpisov majetku (po zmene dokladov ho spustite znova). Ručné zápisy a počiatočné stavy (proti účtu 701) môžete upravovať priamo v tabuľke. Uzamknutý rok sa nedá meniť." />
+          <DataGrid ItemsSource="{Binding Zapisy}" SelectedItem="{Binding VybranyZapis}" AutoGenerateColumns="False" IsReadOnly="{Binding RokUzamknuty}">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Dátum" Binding="{Binding Datum, Converter={StaticResource Datum}}" Width="100" />
+              <DataGridTextColumn Header="Doklad" Binding="{Binding Doklad}" Width="130" />
+              <DataGridTextColumn Header="Popis" Binding="{Binding Popis}" Width="*" />
+              <DataGridTextColumn Header="MD" Binding="{Binding Md}" Width="80" />
+              <DataGridTextColumn Header="D" Binding="{Binding D}" Width="80" />
+              <DataGridTextColumn Header="Suma" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Zdroj" Binding="{Binding Zdroj, Converter={StaticResource EnumText}}" Width="120" IsReadOnly="True" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Hlavná kniha">
+        <Grid RowDefinitions="*,6,*">
+          <DataGrid ItemsSource="{Binding Predvaha}" SelectedItem="{Binding VybranyObrat}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Účet" Binding="{Binding Ucet}" Width="80" />
+              <DataGridTextColumn Header="Názov" Binding="{Binding Nazov}" Width="*" />
+              <DataGridTextColumn Header="Poč. stav" Binding="{Binding Ps, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Obrat MD" Binding="{Binding ObratMd, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Obrat D" Binding="{Binding ObratD, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Zostatok" Binding="{Binding Zostatok, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+          <DataGrid Grid.Row="2" ItemsSource="{Binding HlavnaKniha}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Dátum" Binding="{Binding Datum, Converter={StaticResource Datum}}" Width="100" />
+              <DataGridTextColumn Header="Doklad" Binding="{Binding Doklad}" Width="130" />
+              <DataGridTextColumn Header="Popis" Binding="{Binding Popis}" Width="*" />
+              <DataGridTextColumn Header="Protiúčet" Binding="{Binding Protiucet}" Width="90" />
+              <DataGridTextColumn Header="MD" Binding="{Binding Md, Converter={StaticResource Eur}}" Width="100" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="D" Binding="{Binding D, Converter={StaticResource Eur}}" Width="100" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Zostatok" Binding="{Binding Zostatok, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+      </TabItem>
+      <TabItem Header="Saldokonto">
+        <DockPanel>
+          <CheckBox DockPanel.Dock="Top" IsChecked="{Binding LenOtvoreneSaldo}" Content="len neuhradené k 31. 12." Margin="0,0,0,8" />
+          <DataGrid ItemsSource="{Binding Saldokonto}" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Partner" Binding="{Binding Partner}" Width="*" />
+              <DataGridTextColumn Header="Doklad" Binding="{Binding Doklad}" Width="160" />
+              <DataGridTextColumn Header="Druh" Binding="{Binding Druh, Converter={StaticResource EnumText}}" Width="90" />
+              <DataGridTextColumn Header="Splatná" Binding="{Binding Splatnost, Converter={StaticResource Datum}}" Width="100" />
+              <DataGridTextColumn Header="Suma" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Zostáva" Binding="{Binding Zostatok, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Dní po spl." Binding="{Binding DniPoSplatnosti}" Width="100" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Závierka">
+        <DockPanel>
+          <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <WrapPanel.Styles><Style Selector="Button"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+            <Button Classes="hlavne" Command="{Binding ZavierkaPdfCommand}">Závierka PDF…</Button>
+            <Button Command="{Binding UctovnictvoExcelCommand}">Všetko do Excelu…</Button>
+          </WrapPanel>
+          <TextBlock DockPanel.Dock="Top" Classes="popis" TextWrapping="Wrap" Margin="0,0,0,6"
+                     Text="Súvaha a výkaz ziskov a strát mikro účtovnej jednotky v štruktúre formulára Úč MÚJ (netto hodnoty). Slúži ako podklad na vyplnenie formulára vo Finančnej správe." />
+          <Border DockPanel.Dock="Top" Background="#FFF8EC" CornerRadius="4" Padding="10,6" Margin="0,0,0,8">
+            <TextBlock Text="{Binding KontrolyZavierky}" TextWrapping="Wrap" />
+          </Border>
+          <Grid ColumnDefinitions="*,8,*">
+            <DataGrid ItemsSource="{Binding Suvaha}" AutoGenerateColumns="False" IsReadOnly="True">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Ozn." Binding="{Binding Oznacenie}" Width="60" />
+                <DataGridTextColumn Header="Súvaha" Binding="{Binding Text}" Width="*" />
+                <DataGridTextColumn Header="r." Binding="{Binding Riadok}" Width="44" />
+                <DataGridTextColumn Header="Bežné" Binding="{Binding Bezne, Converter={StaticResource Eur}}" Width="104" CellStyleClasses="cislo" />
+                <DataGridTextColumn Header="Minulé" Binding="{Binding Minule, Converter={StaticResource Eur}}" Width="104" CellStyleClasses="cislo" />
+              </DataGrid.Columns>
+            </DataGrid>
+            <DataGrid Grid.Column="2" ItemsSource="{Binding VykazZiskovAStrat}" AutoGenerateColumns="False" IsReadOnly="True">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Ozn." Binding="{Binding Oznacenie}" Width="60" />
+                <DataGridTextColumn Header="Výkaz ziskov a strát" Binding="{Binding Text}" Width="*" />
+                <DataGridTextColumn Header="r." Binding="{Binding Riadok}" Width="44" />
+                <DataGridTextColumn Header="Bežné" Binding="{Binding Bezne, Converter={StaticResource Eur}}" Width="104" CellStyleClasses="cislo" />
+                <DataGridTextColumn Header="Minulé" Binding="{Binding Minule, Converter={StaticResource Eur}}" Width="104" CellStyleClasses="cislo" />
+              </DataGrid.Columns>
+            </DataGrid>
+          </Grid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Účtový rozvrh">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+            <Button Command="{Binding PridajUcetRozvrhuCommand}">+ Účet</Button>
+            <Button Command="{Binding ZmazUcetRozvrhuCommand}">Zmazať účet</Button>
+            <TextBlock Classes="popis" VerticalAlignment="Center" Text="Analytický účet zapíšte s bodkou, napr. 221.001 (druhý bankový účet) alebo 518.100." />
+          </StackPanel>
+          <DataGrid ItemsSource="{Binding UctovyRozvrh}" SelectedItem="{Binding VybranyUcetRozvrhu}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Účet" Binding="{Binding Cislo}" Width="100" />
+              <DataGridTextColumn Header="Názov" Binding="{Binding Nazov}" Width="*" />
+              <DataGridTemplateColumn Header="Typ" Width="150">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <ComboBox ItemsSource="{x:Static k:Zoznamy.TypyUctov}" SelectedItem="{Binding Typ}" HorizontalAlignment="Stretch" Margin="2" BorderThickness="0" Background="Transparent">
+                      <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource EnumText}}" /></DataTemplate></ComboBox.ItemTemplate>
+                    </ComboBox>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridCheckBoxColumn Header="Daňový" Binding="{Binding Danovy}" Width="90" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+    </TabControl>
+  </DockPanel>
+</UserControl>

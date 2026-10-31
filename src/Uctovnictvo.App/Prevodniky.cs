@@ -68,6 +68,19 @@ public class EnumTextPrevodnik : IValueConverter
         FormaUhrady f => Core.Services.Faktury.NazovFormy(f),
         DruhPokladnicnehoDokladu.Prijem => "príjem (PPD)",
         DruhPokladnicnehoDokladu.Vydavok => "výdavok (VPD)",
+        TypUctu.Aktivny => "aktívny",
+        TypUctu.Pasivny => "pasívny",
+        TypUctu.Nakladovy => "nákladový",
+        TypUctu.Vynosovy => "výnosový",
+        TypUctu.Uzavierkovy => "uzávierkový",
+        TypUctu.Podsuvahovy => "podsúvahový",
+        ZdrojZapisu.Rucne => "ručný zápis",
+        ZdrojZapisu.PociatocnyStav => "počiatočný stav",
+        ZdrojZapisu.Faktura => "faktúra",
+        ZdrojZapisu.Banka => "banka",
+        ZdrojZapisu.Pokladna => "pokladňa",
+        ZdrojZapisu.Odpisy => "odpisy",
+        ZdrojZapisu.Uzavierka => "uzávierka",
         null => "",
         _ => value.ToString() ?? "",
     };
@@ -85,6 +98,7 @@ public static class Zoznamy
     public static TypPohybuFondu[] TypyPohybuFondu { get; } = Enum.GetValues<TypPohybuFondu>();
     public static FormaUhrady[] FormyUhrady { get; } = Enum.GetValues<FormaUhrady>();
     public static TypFaktury[] TypyFaktur { get; } = Enum.GetValues<TypFaktury>();
+    public static TypUctu[] TypyUctov { get; } = Enum.GetValues<TypUctu>();
 }
 
 public class IbanKontrolaPrevodnik : IValueConverter

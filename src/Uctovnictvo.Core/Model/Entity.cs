@@ -325,6 +325,8 @@ public class Faktura
     public int? KategoriaNakladovId { get; set; }
     public KategoriaNakladov? KategoriaNakladov { get; set; }
     public DateOnly? DatumUpomienky { get; set; }
+    /// <summary>Podvojné účtovníctvo: výnosový účet vydanej / nákladový účet prijatej faktúry (prázdne = podľa kategórie alebo 602 / 518).</summary>
+    public string? Ucet { get; set; }
     /// <summary>Kategória daňovej evidencie, ktorú dostane úhrada faktúry.</summary>
     public int? KategoriaPohybuId { get; set; }
     public KategoriaPohybu? KategoriaPohybu { get; set; }
@@ -432,6 +434,8 @@ public class KategoriaPohybu
     public bool Danovy { get; set; } = true;
     /// <summary>Strojový kód pre automatické priradenie a neskôr pre daňové priznanie (napr. „trzby“, „poistne“).</summary>
     public string? Kod { get; set; }
+    /// <summary>Podvojné účtovníctvo: nákladový / výnosový (alebo iný) účet, na ktorý sa kategória účtuje, napr. „518“.</summary>
+    public string? Ucet { get; set; }
     public int Poradie { get; set; }
 
     public override string ToString() => Nazov;
@@ -497,4 +501,59 @@ public class Jazda
     public string? Vodic { get; set; }
     /// <summary>Cena paliva pre túto jazdu (napr. podľa bločku); ak chýba, použije sa cena z vozidla.</summary>
     public decimal? CenaPaliva { get; set; }
+}
+
+public enum TypUctu
+{
+    Aktivny = 0,
+    Pasivny = 1,
+    Nakladovy = 2,
+    Vynosovy = 3,
+    Uzavierkovy = 4,
+    Podsuvahovy = 5,
+}
+
+/// <summary>Účet účtového rozvrhu (syntetický „221“ alebo analytický „221.001“).</summary>
+public class Ucet
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public string Cislo { get; set; } = "";
+    public string Nazov { get; set; } = "";
+    public TypUctu Typ { get; set; }
+    /// <summary>Náklad / výnos je daňový (pre daňové priznanie PO).</summary>
+    public bool Danovy { get; set; } = true;
+
+    public string Synteticky => Cislo.Length >= 3 ? Cislo[..3] : Cislo;
+    public override string ToString() => $"{Cislo} {Nazov}";
+}
+
+public enum ZdrojZapisu
+{
+    Rucne = 0,
+    PociatocnyStav = 1,
+    Faktura = 2,
+    Banka = 3,
+    Pokladna = 4,
+    Odpisy = 5,
+    Uzavierka = 6,
+}
+
+/// <summary>Účtovný zápis: suma na ťarchu účtu MD a v prospech účtu D.</summary>
+public class UctovnyZapis
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public DateOnly Datum { get; set; }
+    public string Doklad { get; set; } = "";
+    public string Popis { get; set; } = "";
+    public string Md { get; set; } = "";
+    public string D { get; set; } = "";
+    public decimal Suma { get; set; }
+    public ZdrojZapisu Zdroj { get; set; }
+    /// <summary>Faktúra, ku ktorej zápis patrí (saldokonto).</summary>
+    public int? FakturaId { get; set; }
+    public string? Partner { get; set; }
 }

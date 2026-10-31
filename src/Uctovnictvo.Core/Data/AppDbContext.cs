@@ -29,6 +29,8 @@ public class AppDbContext : DbContext
     public DbSet<Majetok> Majetok => Set<Majetok>();
     public DbSet<Vozidlo> Vozidla => Set<Vozidlo>();
     public DbSet<Jazda> Jazdy => Set<Jazda>();
+    public DbSet<Ucet> Ucty => Set<Ucet>();
+    public DbSet<UctovnyZapis> UctovneZapisy => Set<UctovnyZapis>();
 
     public static AppDbContext Open(string dbPath)
     {
@@ -122,6 +124,8 @@ public class AppDbContext : DbContext
         b.Entity<Majetok>().ToTable("Majetok");
         b.Entity<Vozidlo>().ToTable("Vozidla");
         b.Entity<Jazda>(e => { e.ToTable("Jazdy"); e.HasIndex(j => new { j.VozidloId, j.Datum }); });
+        b.Entity<Ucet>(e => { e.ToTable("Ucty"); e.HasIndex(u => new { u.JednotkaId, u.Cislo }).IsUnique(); e.Ignore(u => u.Synteticky); });
+        b.Entity<UctovnyZapis>(e => { e.ToTable("UctovneZapisy"); e.HasIndex(z => new { z.JednotkaId, z.Datum }); });
     }
 }
 
