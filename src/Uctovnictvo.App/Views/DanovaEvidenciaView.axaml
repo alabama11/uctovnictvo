@@ -1,0 +1,38 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.DanovaEvidenciaView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles><Style Selector="Button, CheckBox"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <Button Classes="hlavne" Command="{Binding ZaradAutomatickyCommand}">Zaradiť automaticky</Button>
+      <CheckBox IsChecked="{Binding LenNezaradene}" Content="len nezaradené" />
+      <Button Command="{Binding PridajKategoriuPohybuCommand}">+ Kategória…</Button>
+      <Button Command="{Binding DanovaEvidenciaPdfCommand}">Daňová evidencia PDF…</Button>
+      <Button Command="{Binding DanovaEvidenciaExcelCommand}">Excel…</Button>
+    </WrapPanel>
+    <TextBlock DockPanel.Dock="Top" Classes="popis" TextWrapping="Wrap" Margin="0,0,0,8"
+               Text="Peňažný denník tvoria pohyby z Banky a Pokladne. Príjem a výdavok sa započíta v deň zaplatenia. Úhrady faktúr sa zaradia samé; ostatným pohybom vyberte kategóriu. Odpisy (záložka Majetok) a cestovné náhrady (Kniha jázd) sa pripočítajú k výdavkom." />
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding SuhrnDanovejEvidencie}" FontWeight="SemiBold" TextWrapping="Wrap" />
+    </Border>
+    <DataGrid ItemsSource="{Binding Dennik}" SelectedItem="{Binding VybranyRiadokDennika}" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Dátum" Binding="{Binding Datum, Converter={StaticResource Datum}}" Width="100" IsReadOnly="True" />
+        <DataGridTextColumn Header="Doklad" Binding="{Binding Doklad}" Width="112" IsReadOnly="True" />
+        <DataGridTextColumn Header="Popis" Binding="{Binding Popis}" Width="*" IsReadOnly="True" />
+        <DataGridTextColumn Header="Príjem" Binding="{Binding Prijem, Converter={StaticResource Eur}}" Width="96" IsReadOnly="True" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Výdavok" Binding="{Binding Vydavok, Converter={StaticResource Eur}}" Width="96" IsReadOnly="True" CellStyleClasses="cislo" />
+        <DataGridTemplateColumn Header="Kategória" Width="290">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+              <ComboBox ItemsSource="{Binding Kategorie}" SelectedItem="{Binding Kategoria}"
+                        HorizontalAlignment="Stretch" Margin="2" PlaceholderText="⚠ vyberte kategóriu" BorderThickness="0" Background="Transparent">
+                <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
+              </ComboBox>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

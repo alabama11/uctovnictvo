@@ -137,6 +137,12 @@ public static class Ukazka
         d.Jednotka = j;
         db.PokladnicneDoklady.Add(d);
         db.PokladnicneDoklady.Add(new PokladnicnyDoklad { Jednotka = j, Druh = DruhPokladnicnehoDokladu.Vydavok, Cislo = $"VPD{rok}002", Datum = new DateOnly(rok, 4, 2), Suma = 12.50m, Ucel = "Poštovné", Osoba = "Slovenská pošta" });
+        db.Majetok.Add(new Majetok { Jednotka = j, InventarneCislo = $"M{rok}001", Nazov = "Notebook a monitor", DatumObstarania = new DateOnly(rok, 3, 5), DatumZaradenia = new DateOnly(rok, 3, 5), VstupnaCena = 2150m, OdpisovaSkupina = 1 });
+        var auto = new Vozidlo { Jednotka = j, Nazov = "Škoda Octavia", Ecv = "ZA123AB", Spotreba = 5.6m, Palivo = "nafta", CenaPaliva = 1.52m, StavTachometraZaciatok = 84210 };
+        auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 4), Odkial = "Žilina", Kam = "Martin", Ucel = "Stavebný dozor – Stavby Sever", Km = 34, Vodic = "Eva Ukážková" });
+        auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 4), Odkial = "Martin", Kam = "Žilina", Ucel = "Stavebný dozor – Stavby Sever", Km = 34, Vodic = "Eva Ukážková" });
+        auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 6), Odkial = "Žilina", Kam = "Terchová", Ucel = "", Km = 26, Sukromna = true, Vodic = "Eva Ukážková" });
+        db.Vozidla.Add(auto);
         db.SaveChanges();
         return j;
     }

@@ -56,6 +56,7 @@ public partial class MainViewModel
         NacitajBanku();
         NacitajPokladnu();
         ObnovNakladyZFaktur();
+        NacitajCast3();
     }
 
     IEnumerable<string> CislaFaktur(DruhFaktury druh) => vsetkyFaktury.Where(f => f.Druh == druh).Select(f => f.Cislo);
@@ -430,6 +431,7 @@ public partial class MainViewModel
         var vydavky = -BankovePohyby.Where(p => p.Suma < 0).Sum(p => p.Suma);
         SumaBanky = $"Príjmy: {PdfVyuctovanie.Eur(prijmy)}   Výdavky: {PdfVyuctovanie.Eur(vydavky)}   " +
                     $"Nespárované: {BankovePohyby.Count(p => p.P.Uhrady.Count == 0)}";
+        NacitajDennik();
     }
 
     [RelayCommand]
@@ -563,6 +565,7 @@ public partial class MainViewModel
                        $"Výdavky: {PdfVyuctovanie.Eur(riadky.Sum(r => r.Vydavok))}   Zostatok: {PdfVyuctovanie.Eur(koniec)}" +
                        (zaporny is null ? "" : $"   ⚠ Po doklade {zaporny.Doklad.Cislo} je pokladňa v mínuse – skontrolujte dátumy a sumy.");
         OnPropertyChanged(nameof(PokladnaPociatocnyStav));
+        NacitajDennik();
     }
 
     [RelayCommand]
