@@ -77,6 +77,8 @@ public static class Podvojne
         "prevod" => "261",
         "uver" => "461",
         "majetok" => "042",
+        "odvody-zam" => "336",
+        "dan-zam" => "342",
         _ => k?.Druh == DruhKategorie.Prijem ? "648" : "548",
     };
 
@@ -88,9 +90,10 @@ public static class Podvojne
     /// a majetok: zaradenie (022/042), daňové odpisy (551/082) a vyradenie (082/022, 541/022).
     /// </summary>
     public static List<UctovnyZapis> Zauctuj(int jednotkaId, int rok, IEnumerable<Faktura> faktury, IEnumerable<BankovyPohyb> pohyby,
-        IEnumerable<PokladnicnyDoklad> doklady, IEnumerable<Majetok> majetok)
+        IEnumerable<PokladnicnyDoklad> doklady, IEnumerable<Majetok> majetok, IEnumerable<MzdaMesiac>? mzdy = null)
     {
         var z = new List<UctovnyZapis>();
+        if (mzdy is not null) z.AddRange(Mzdy.Zauctuj(jednotkaId, rok, mzdy));
         void Pridaj(DateOnly d, string doklad, string popis, string md, string dal, decimal suma, ZdrojZapisu zdroj, Faktura? f = null, string? partner = null)
         {
             if (suma == 0) return;

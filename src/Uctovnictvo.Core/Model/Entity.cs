@@ -538,6 +538,7 @@ public enum ZdrojZapisu
     Pokladna = 4,
     Odpisy = 5,
     Uzavierka = 6,
+    Mzdy = 7,
 }
 
 /// <summary>Účtovný zápis: suma na ťarchu účtu MD a v prospech účtu D.</summary>
@@ -556,4 +557,52 @@ public class UctovnyZapis
     /// <summary>Faktúra, ku ktorej zápis patrí (saldokonto).</summary>
     public int? FakturaId { get; set; }
     public string? Partner { get; set; }
+}
+
+/// <summary>Zamestnanec v pracovnom pomere (mzdy pre malú firmu).</summary>
+public class Zamestnanec
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public string Meno { get; set; } = "";
+    public string? Adresa { get; set; }
+    public string? RodneCislo { get; set; }
+    public string? Iban { get; set; }
+    public string? ZdravotnaPoistovna { get; set; }
+    public string? Funkcia { get; set; }
+    public DateOnly DatumNastupu { get; set; }
+    public DateOnly? DatumUkoncenia { get; set; }
+    /// <summary>Dohodnutá mesačná mzda (predvolená hrubá mzda nového mesiaca).</summary>
+    public decimal MesacnaMzda { get; set; }
+    /// <summary>Podpísané vyhlásenie na uplatnenie nezdaniteľnej časti a daňového bonusu.</summary>
+    public bool Vyhlasenie { get; set; } = true;
+    /// <summary>Zamestnanec so zdravotným postihnutím (polovičná sadzba zdravotného poistenia).</summary>
+    public bool ZdravotnePostihnuty { get; set; }
+    /// <summary>Mesačný daňový bonus na deti podľa vyhlásenia (suma spolu).</summary>
+    public decimal DanovyBonusMesacne { get; set; }
+    public List<MzdaMesiac> Mzdy { get; set; } = new();
+}
+
+/// <summary>Spracovaná mzda zamestnanca za mesiac (vypočítané hodnoty sa ukladajú pre históriu a zaúčtovanie).</summary>
+public class MzdaMesiac
+{
+    public int Id { get; set; }
+    public int ZamestnanecId { get; set; }
+    public Zamestnanec? Zamestnanec { get; set; }
+    public int Rok { get; set; }
+    public int Mesiac { get; set; }
+    public decimal HrubaMzda { get; set; }
+    public decimal SpZamestnanec { get; set; }
+    public decimal ZpZamestnanec { get; set; }
+    public decimal Nczd { get; set; }
+    public decimal ZakladDane { get; set; }
+    public decimal Preddavok { get; set; }
+    public decimal DanovyBonus { get; set; }
+    public decimal SpZamestnavatel { get; set; }
+    public decimal ZpZamestnavatel { get; set; }
+    public string? Poznamka { get; set; }
+
+    public decimal CistaMzda => HrubaMzda - SpZamestnanec - ZpZamestnanec - Preddavok + DanovyBonus;
+    public decimal CenaPrace => HrubaMzda + SpZamestnavatel + ZpZamestnavatel;
 }

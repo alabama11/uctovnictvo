@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.MzdyView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles><Style Selector="Button, ComboBox, TextBlock"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <Button Command="{Binding PridajZamestnancaCommand}">+ Zamestnanec</Button>
+      <Button Command="{Binding ZmazZamestnancaCommand}">Zmazať zamestnanca</Button>
+      <TextBlock Text="Mesiac:" VerticalAlignment="Center" FontWeight="SemiBold" />
+      <ComboBox ItemsSource="{Binding Mesiace}" SelectedItem="{Binding MesiacMzdy}" Width="80" />
+      <Button Classes="hlavne" Command="{Binding SpracujMzdyCommand}">Spracovať mzdy za mesiac</Button>
+      <Button Command="{Binding VyplatnePaskyPdfCommand}">Výplatné pásky PDF…</Button>
+    </WrapPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding RekapitulaciaMzdy}" FontWeight="SemiBold" TextWrapping="Wrap" />
+    </Border>
+    <ListBox DockPanel.Dock="Left" Width="210" ItemsSource="{Binding Zamestnanci}" SelectedItem="{Binding VybranyZamestnanec}" Margin="0,0,12,0">
+      <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Meno}" /></DataTemplate></ListBox.ItemTemplate>
+    </ListBox>
+    <DockPanel>
+      <Grid DockPanel.Dock="Top" ColumnDefinitions="150,*,16,150,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" DataContext="{Binding VybranyZamestnanec}"
+            IsVisible="{Binding $parent[UserControl].DataContext.VybranyZamestnanec, Converter={x:Static ObjectConverters.IsNotNull}}" Margin="0,0,0,8">
+        <Grid.Styles><Style Selector="TextBox, CheckBox"><Setter Property="Margin" Value="0,3" /></Style></Grid.Styles>
+        <TextBlock Classes="stitok" Text="Meno a priezvisko" />
+        <TextBox Grid.Column="1" Text="{Binding Meno}" />
+        <TextBlock Grid.Column="3" Classes="stitok" Text="Dohodnutá mzda €" />
+        <TextBox Grid.Column="4" Text="{Binding MesacnaMzda, Converter={StaticResource Eur}}" />
+        <TextBlock Grid.Row="1" Classes="stitok" Text="Funkcia" />
+        <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Funkcia}" />
+        <TextBlock Grid.Row="1" Grid.Column="3" Classes="stitok" Text="Nástup / ukončenie" />
+        <Grid Grid.Row="1" Grid.Column="4" ColumnDefinitions="*,6,*">
+          <TextBox Text="{Binding DatumNastupu, Converter={StaticResource Datum}}" />
+          <TextBox Grid.Column="2" Text="{Binding DatumUkoncenia, Converter={StaticResource Datum}}" Watermark="trvá" />
+        </Grid>
+        <TextBlock Grid.Row="2" Classes="stitok" Text="Zdravotná poisťovňa" />
+        <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding ZdravotnaPoistovna}" Watermark="VšZP / Dôvera / Union" />
+        <TextBlock Grid.Row="2" Grid.Column="3" Classes="stitok" Text="IBAN na výplatu" />
+        <TextBox Grid.Row="2" Grid.Column="4" Text="{Binding Iban}" />
+        <TextBlock Grid.Row="3" Classes="stitok" Text="Daňový bonus €/mes." />
+        <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding DanovyBonusMesacne, Converter={StaticResource Eur}}" />
+        <CheckBox Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2" IsChecked="{Binding Vyhlasenie}" Content="podpísal vyhlásenie (nezdaniteľná časť, bonus)" />
+        <CheckBox Grid.Row="4" Grid.Column="3" Grid.ColumnSpan="2" IsChecked="{Binding ZdravotnePostihnuty}" Content="zdravotne postihnutý (znížené zdravotné poistenie)" />
+      </Grid>
+      <TextBlock DockPanel.Dock="Top" Classes="popis" TextWrapping="Wrap" Margin="0,0,0,6"
+                 Text="Pracovný pomer: zadajte hrubú mzdu mesiaca (vrátane prémií a náhrad), odvody, preddavok na daň a čistá mzda sa vypočítajú. Dohody o práci mimo pracovného pomeru program zatiaľ nepočíta." />
+      <DataGrid ItemsSource="{Binding MzdyRoka}" SelectedItem="{Binding VybranaMzda}" AutoGenerateColumns="False">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Mes." Binding="{Binding Mesiac}" Width="60" IsReadOnly="True" />
+          <DataGridTextColumn Header="Hrubá mzda" Binding="{Binding HrubaMzda, Converter={StaticResource Eur}}" Width="110" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Poistné" Binding="{Binding Odvody, Converter={StaticResource Eur}}" Width="100" IsReadOnly="True" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Daň" Binding="{Binding Preddavok, Converter={StaticResource Eur}}" Width="90" IsReadOnly="True" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Bonus" Binding="{Binding DanovyBonus, Converter={StaticResource Eur}}" Width="90" IsReadOnly="True" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Čistá mzda" Binding="{Binding CistaMzda, Converter={StaticResource Eur}}" Width="110" IsReadOnly="True" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Odvody firmy" Binding="{Binding OdvodyZamestnavatela, Converter={StaticResource Eur}}" Width="120" IsReadOnly="True" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Cena práce" Binding="{Binding CenaPrace, Converter={StaticResource Eur}}" Width="110" IsReadOnly="True" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Poznámka" Binding="{Binding Poznamka}" Width="*" />
+        </DataGrid.Columns>
+      </DataGrid>
+    </DockPanel>
+  </DockPanel>
+</UserControl>

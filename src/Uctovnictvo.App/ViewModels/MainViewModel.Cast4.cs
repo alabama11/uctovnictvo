@@ -152,11 +152,11 @@ public partial class MainViewModel
         if (j is null || Dialogy is null || !OverOdomknute()) return;
         var automaticke = zapisyRoka.Where(z => z.Zdroj is not (ZdrojZapisu.Rucne or ZdrojZapisu.PociatocnyStav)).ToList();
         if (automaticke.Count > 0 && !await Dialogy.Potvrd("Zaúčtovať doklady",
-                $"Automatické zápisy roka {Rok} ({automaticke.Count}) sa vytvoria nanovo z faktúr, banky, pokladne a majetku. Ručné zápisy a počiatočné stavy zostanú. Pokračovať?"))
+                $"Automatické zápisy roka {Rok} ({automaticke.Count}) sa vytvoria nanovo z faktúr, banky, pokladne, majetku a miezd. Ručné zápisy a počiatočné stavy zostanú. Pokračovať?"))
             return;
         Uloz();
         db.UctovneZapisy.RemoveRange(automaticke);
-        var nove = Podvojne.Zauctuj(j.Id, Rok, vsetkyFaktury, vsetkyPohyby, vsetkyDoklady, vsetokMajetok);
+        var nove = Podvojne.Zauctuj(j.Id, Rok, vsetkyFaktury, vsetkyPohyby, vsetkyDoklady, vsetokMajetok, vsetkyMzdy);
         db.UctovneZapisy.AddRange(nove);
         db.SaveChanges();
         zapisyRoka = zapisyRoka.Except(automaticke).Concat(nove).ToList();

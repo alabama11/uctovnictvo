@@ -81,6 +81,7 @@ public class EnumTextPrevodnik : IValueConverter
         ZdrojZapisu.Pokladna => "pokladňa",
         ZdrojZapisu.Odpisy => "odpisy",
         ZdrojZapisu.Uzavierka => "uzávierka",
+        ZdrojZapisu.Mzdy => "mzdy",
         null => "",
         _ => value.ToString() ?? "",
     };

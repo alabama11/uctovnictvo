@@ -31,6 +31,8 @@ public class AppDbContext : DbContext
     public DbSet<Jazda> Jazdy => Set<Jazda>();
     public DbSet<Ucet> Ucty => Set<Ucet>();
     public DbSet<UctovnyZapis> UctovneZapisy => Set<UctovnyZapis>();
+    public DbSet<Zamestnanec> Zamestnanci => Set<Zamestnanec>();
+    public DbSet<MzdaMesiac> Mzdy => Set<MzdaMesiac>();
 
     public static AppDbContext Open(string dbPath)
     {
@@ -124,6 +126,8 @@ public class AppDbContext : DbContext
         b.Entity<Majetok>().ToTable("Majetok");
         b.Entity<Vozidlo>().ToTable("Vozidla");
         b.Entity<Jazda>(e => { e.ToTable("Jazdy"); e.HasIndex(j => new { j.VozidloId, j.Datum }); });
+        b.Entity<Zamestnanec>(e => { e.ToTable("Zamestnanci"); e.HasMany(z => z.Mzdy).WithOne(m => m.Zamestnanec!).HasForeignKey(m => m.ZamestnanecId).OnDelete(DeleteBehavior.Cascade); });
+        b.Entity<MzdaMesiac>(e => { e.ToTable("Mzdy"); e.HasIndex(m => new { m.ZamestnanecId, m.Rok, m.Mesiac }).IsUnique(); e.Ignore(m => m.CistaMzda); e.Ignore(m => m.CenaPrace); });
         b.Entity<Ucet>(e => { e.ToTable("Ucty"); e.HasIndex(u => new { u.JednotkaId, u.Cislo }).IsUnique(); e.Ignore(u => u.Synteticky); });
         b.Entity<UctovnyZapis>(e => { e.ToTable("UctovneZapisy"); e.HasIndex(z => new { z.JednotkaId, z.Datum }); });
     }

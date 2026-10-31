@@ -154,6 +154,7 @@ public static class Ukazka
         auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 4), Odkial = "Martin", Kam = "Žilina", Ucel = "Stavebný dozor – Stavby Sever", Km = 34, Vodic = "Eva Ukážková" });
         auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 6), Odkial = "Žilina", Kam = "Terchová", Ucel = "", Km = 26, Sukromna = true, Vodic = "Eva Ukážková" });
         db.Vozidla.Add(auto);
+        db.Zamestnanci.Add(new Zamestnanec { Jednotka = j, Meno = "Ján Ukážkový", Funkcia = "technik", DatumNastupu = new DateOnly(rok, 1, 1), MesacnaMzda = 1500m, ZdravotnaPoistovna = "VšZP", DanovyBonusMesacne = 100m });
         // počiatočné stavy podvojného účtovníctva: banka 5 000 €, pokladnica 150 €, základné imanie 5 000 €, nerozdelený zisk 150 €
         var ps = new DateOnly(rok, 1, 1);
         foreach (var (md, dal, suma) in new[] { ("221", "701", 5000m), ("211", "701", 150m), ("701", "411", 5000m), ("701", "428", 150m) })
