@@ -137,12 +137,27 @@ public static class Ukazka
         d.Jednotka = j;
         db.PokladnicneDoklady.Add(d);
         db.PokladnicneDoklady.Add(new PokladnicnyDoklad { Jednotka = j, Druh = DruhPokladnicnehoDokladu.Vydavok, Cislo = $"VPD{rok}002", Datum = new DateOnly(rok, 4, 2), Suma = 12.50m, Ucel = "Poštovné", Osoba = "Slovenská pošta" });
+        var p2 = new Faktura
+        {
+            Jednotka = j, Druh = DruhFaktury.Prijata, Cislo = $"PF{rok}0002", CisloDodavatela = "FA-3391", VariabilnySymbol = "3391", Ucet = "042",
+            DatumVystavenia = new DateOnly(rok, 3, 5), DatumDodania = new DateOnly(rok, 3, 5), DatumSplatnosti = new DateOnly(rok, 3, 19),
+        };
+        Faktury.NastavPartnera(p2, dodavatel);
+        p2.Polozky.Add(new PolozkaFaktury { Poradie = 1, Popis = "Notebook a monitor", Mnozstvo = 1, CenaZaJednotku = 2150m });
+        db.Faktury.Add(p2);
+        var b3 = new BankovyPohyb { Jednotka = j, Datum = new DateOnly(rok, 3, 8), Suma = -2150m, ProtiNazov = dodavatel.Nazov, ProtiIban = dodavatel.Iban, VariabilnySymbol = "3391", Referencia = "ukazka-3", Popis = "FA-3391" };
+        db.BankovePohyby.Add(b3);
+        Banka.Uhrad(p2, b3);
         db.Majetok.Add(new Majetok { Jednotka = j, InventarneCislo = $"M{rok}001", Nazov = "Notebook a monitor", DatumObstarania = new DateOnly(rok, 3, 5), DatumZaradenia = new DateOnly(rok, 3, 5), VstupnaCena = 2150m, OdpisovaSkupina = 1 });
         var auto = new Vozidlo { Jednotka = j, Nazov = "Škoda Octavia", Ecv = "ZA123AB", Spotreba = 5.6m, Palivo = "nafta", CenaPaliva = 1.52m, StavTachometraZaciatok = 84210 };
         auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 4), Odkial = "Žilina", Kam = "Martin", Ucel = "Stavebný dozor – Stavby Sever", Km = 34, Vodic = "Eva Ukážková" });
         auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 4), Odkial = "Martin", Kam = "Žilina", Ucel = "Stavebný dozor – Stavby Sever", Km = 34, Vodic = "Eva Ukážková" });
         auto.Jazdy.Add(new Jazda { Datum = new DateOnly(rok, 9, 6), Odkial = "Žilina", Kam = "Terchová", Ucel = "", Km = 26, Sukromna = true, Vodic = "Eva Ukážková" });
         db.Vozidla.Add(auto);
+        // počiatočné stavy podvojného účtovníctva: banka 5 000 €, pokladnica 150 €, základné imanie 5 000 €, nerozdelený zisk 150 €
+        var ps = new DateOnly(rok, 1, 1);
+        foreach (var (md, dal, suma) in new[] { ("221", "701", 5000m), ("211", "701", 150m), ("701", "411", 5000m), ("701", "428", 150m) })
+            db.UctovneZapisy.Add(new UctovnyZapis { Jednotka = j, Datum = ps, Doklad = "PS", Popis = "Počiatočný stav", Md = md, D = dal, Suma = suma, Zdroj = ZdrojZapisu.PociatocnyStav });
         db.SaveChanges();
         return j;
     }

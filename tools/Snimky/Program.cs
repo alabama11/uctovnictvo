@@ -56,6 +56,12 @@ vm.ZaradAutomatickyCommand.Execute(null);
 zalozky.SelectedIndex = Index("Daňová evidencia"); Snimka("13-danova-evidencia");
 zalozky.SelectedIndex = Index("Majetok"); Snimka("14-majetok");
 zalozky.SelectedIndex = Index("Kniha jázd"); Snimka("15-kniha-jazd");
+vm.ZauctujDokladyCommand.Execute(null);
+zalozky.SelectedIndex = Index("Účtovníctvo");
+Dispatcher.UIThread.RunJobs();
+var uct = w.GetVisualDescendantsOfType<TabControl>().First(t => t != zalozky && t.Items.Cast<TabItem>().Any(x => (string?)x.Header == "Závierka"));
+string[] uctMena = { "16a-dennik", "16b-hlavna-kniha", "16c-saldokonto", "16d-zavierka", "16e-rozvrh" };
+for (int i = 0; i < uctMena.Length; i++) { uct.SelectedIndex = i; Snimka(uctMena[i]); }
 Console.WriteLine("Hotovo: " + Path.GetFullPath(vystup));
 
 static class Rozsirenia

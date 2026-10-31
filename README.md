@@ -40,6 +40,14 @@ SZČO a s.r.o. Plán fáz: https://claude.ai/artifact/1kTvw5b8YGGokzXtbfffMn
 - majetok: odpisové skupiny 0–6, rovnomerné a zrýchlené daňové odpisy podľa postupu Finančnej správy, pomerná časť v roku zaradenia, vyradenie, podiel použitia na podnikanie
 - kniha jázd: vozidlá, jazdy, spiatočná jazda, základná náhrada za km (0,296 € od 1. 6. 2025, 0,313 € od 1. 1. 2026, upraviteľné) a náhrada za PHM; PDF
 
+## Verzia 0.5 – podvojné účtovníctvo (s.r.o.)
+
+- účtový rozvrh podľa rámcovej účtovej osnovy (upraviteľný, analytické účty s bodkou, napr. 221.001)
+- „Zaúčtovať doklady“: predkontácie z faktúr (311/6xx, 5xx/321, zálohové faktúry cez 324/314), banky (221), pokladne (211), majetku (022/042, odpisy 551/082, vyradenie 082/022 a 541/022); účet na faktúre alebo podľa kategórie
+- ručné zápisy (interné doklady), počiatočné stavy proti 701, otvorenie roka z konečných zostatkov (VH do 431), uzamknutie roka
+- hlavná kniha a obratová predvaha, saldokonto k 31. 12.
+- účtovná závierka mikro účtovnej jednotky v štruktúre Úč MÚJ (súvaha r. 01–45, výkaz ziskov a strát r. 01–38, netto, bežné a minulé obdobie) s kontrolami; PDF a Excel – podklad na vyplnenie formulára vo Finančnej správe
+
 Údaje sú v `Dokumenty\Uctovnictvo\uctovnictvo.db`.
 
 ## Zostavenie

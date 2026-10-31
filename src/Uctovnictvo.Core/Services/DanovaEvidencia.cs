@@ -52,6 +52,7 @@ public static class DanovaEvidencia
             ("Ostatné daňové výdavky", DruhKategorie.Vydavok, true, "ostatne"),
             ("Nedaňové výdavky (súkromné, pokuty…)", DruhKategorie.Vydavok, false, "nedanove"),
             ("Daň z príjmov", DruhKategorie.Vydavok, false, "dan"),
+            ("Nákup dlhodobého majetku (odpisuje sa)", DruhKategorie.Neutralny, false, "majetok"),
             ("Vklad / výber podnikateľa", DruhKategorie.Neutralny, false, "vklad"),
             ("Prevod banka – pokladňa", DruhKategorie.Neutralny, false, "prevod"),
             ("Úver, pôžička", DruhKategorie.Neutralny, false, "uver"),

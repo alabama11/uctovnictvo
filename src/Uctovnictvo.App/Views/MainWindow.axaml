@@ -115,6 +115,9 @@
           <TabItem Header="Kniha jázd" IsVisible="{Binding JeFirma}">
             <v:KnihaJazdView />
           </TabItem>
+          <TabItem Header="Účtovníctvo" IsVisible="{Binding JeSro}">
+            <v:UctovnictvoView />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Panel>

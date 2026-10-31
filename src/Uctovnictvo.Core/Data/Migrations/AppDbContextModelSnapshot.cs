@@ -163,6 +163,9 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Property<int>("Typ")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Ucet")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("VariabilnySymbol")
                         .HasColumnType("TEXT");
 
@@ -278,6 +281,9 @@ namespace Uctovnictvo.Core.Data.Migrations
 
                     b.Property<int>("Poradie")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Ucet")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -660,6 +666,37 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.ToTable("PriestorRoky", (string)null);
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Ucet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Cislo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Danovy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nazov")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Typ")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId", "Cislo")
+                        .IsUnique();
+
+                    b.ToTable("Ucty", (string)null);
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.UctovnaJednotka", b =>
                 {
                     b.Property<int>("Id")
@@ -722,6 +759,53 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Jednotky", (string)null);
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.UctovnyZapis", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("D")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Doklad")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("FakturaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Md")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Partner")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Popis")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Suma")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Zdroj")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId", "Datum");
+
+                    b.ToTable("UctovneZapisy", (string)null);
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.Uhrada", b =>
@@ -1086,6 +1170,28 @@ namespace Uctovnictvo.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Priestor");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Ucet", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.UctovnyZapis", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.Uhrada", b =>

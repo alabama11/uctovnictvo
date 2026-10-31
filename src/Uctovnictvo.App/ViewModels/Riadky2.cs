@@ -52,6 +52,8 @@ public partial class FakturaVm : ObservableObject
         set { if (value is null) return; F.KategoriaNakladov = value; F.KategoriaNakladovId = value.Id; OnPropertyChanged(); }
     }
 
+    /// <summary>Výnosový / nákladový účet pre podvojné účtovníctvo (prázdne = podľa kategórie).</summary>
+    public string? Ucet { get => F.Ucet; set { F.Ucet = string.IsNullOrWhiteSpace(value) ? null : value.Trim(); OnPropertyChanged(); } }
     public KategoriaPohybu? KategoriaPohybu
     {
         get => F.KategoriaPohybu;

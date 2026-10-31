@@ -91,6 +91,9 @@
                       IsVisible="{Binding $parent[UserControl].DataContext.JeFirma}" PlaceholderText="pre daňovú evidenciu (nepovinné)">
               <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
             </ComboBox>
+            <TextBlock Grid.Row="6" Grid.Column="3" Classes="stitok" Text="Účet" IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
+            <TextBox Grid.Row="6" Grid.Column="4" Text="{Binding Ucet}" Watermark="napr. 602, 518 (inak podľa kategórie)"
+                     IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
           </Grid>
           <TextBox Text="{Binding TextNad}" Watermark="Text nad položkami (nepovinný)" AcceptsReturn="True" TextWrapping="Wrap" />
           <StackPanel Orientation="Horizontal" Spacing="8">

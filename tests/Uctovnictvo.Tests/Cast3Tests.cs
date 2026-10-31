@@ -181,7 +181,7 @@ public class Cast3DatabazaTests : IDisposable
         }
         using (var c = AppDbContext.Open(db))
         {
-            Assert.Equal(17, c.KategoriePohybov.Count());
+            Assert.Equal(18, c.KategoriePohybov.Count());
             Assert.Equal("poplatky", c.BankovePohyby.Include(p => p.Kategoria).Single().Kategoria!.Kod);
             Assert.Single(c.Vozidla.Include(v => v.Jazdy).Single().Jazdy);
             Assert.Equal(1800m, c.Majetok.Single().VstupnaCena);

@@ -66,6 +66,7 @@ public partial class MainViewModel : ObservableObject
 
     public bool JeSpolocenstvo => VybranaJednotka?.Typ == TypJednotky.Spolocenstvo;
     public bool JeFirma => VybranaJednotka is not null && !JeSpolocenstvo;
+    public bool JeSro => VybranaJednotka?.Typ == TypJednotky.Sro;
     public bool MaJednotku => VybranaJednotka is not null;
     public bool NemaJednotku => VybranaJednotka is null;
 
@@ -102,6 +103,7 @@ public partial class MainViewModel : ObservableObject
         if (oldValue is not null) Uloz();
         OnPropertyChanged(nameof(JeSpolocenstvo));
         OnPropertyChanged(nameof(JeFirma));
+        OnPropertyChanged(nameof(JeSro));
         OnPropertyChanged(nameof(MaJednotku));
         OnPropertyChanged(nameof(NemaJednotku));
         MiestoVystavenia = newValue?.Obec ?? "";
