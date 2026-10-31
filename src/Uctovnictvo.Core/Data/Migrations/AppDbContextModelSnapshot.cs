@@ -97,6 +97,56 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.ToTable("NakladyRoka", (string)null);
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Nastavenie", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Hodnota")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Kluc")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Kluc")
+                        .IsUnique();
+
+                    b.ToTable("Nastavenia", (string)null);
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PohybFondu", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Popis")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Suma")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Typ")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId");
+
+                    b.ToTable("PohybyFondu", (string)null);
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.PredpisPolozky", b =>
                 {
                     b.Property<int>("Id")
@@ -199,6 +249,9 @@ namespace Uctovnictvo.Core.Data.Migrations
 
                     b.Property<int>("Rok")
                         .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("SpotrebaVymenenyVodomer")
+                        .HasColumnType("TEXT");
 
                     b.Property<decimal?>("StavVodomeruKoniec")
                         .HasColumnType("TEXT");
@@ -338,6 +391,12 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Property<string>("Ulica")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("VlastnikDo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("VlastnikOd")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PriestorId");
@@ -376,6 +435,17 @@ namespace Uctovnictvo.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Kategoria");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PohybFondu", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.PredpisPolozky", b =>

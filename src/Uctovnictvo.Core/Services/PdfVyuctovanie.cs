@@ -22,8 +22,8 @@ public static class PdfVyuctovanie
     }
 
     public static string Eur(decimal d) => d.ToString("N2", Sk) + " €";
-    static string M3(decimal d) => d.ToString("N3", Sk) + " m³";
-    static string Datum(DateOnly? d) => d?.ToString("d.M.yyyy", Sk) ?? "";
+    internal static string M3(decimal d) => d.ToString("N3", Sk) + " m³";
+    internal static string Datum(DateOnly? d) => d?.ToString("d.M.yyyy", Sk) ?? "";
 
     /// <summary>Jeden PDF súbor s listom pre každý priestor (každý na samostatnej strane).</summary>
     public static void Uloz(UctovnaJednotka jednotka, IEnumerable<VyuctovanieBytu> byty, NastaveniaVyuctovania n, string path) =>
@@ -51,6 +51,8 @@ public static class PdfVyuctovanie
             col.Spacing(8);
             col.Item().AlignCenter().Text($"{j.Nazov}{(adresa.Length > 0 ? ", " + adresa : "")}").Bold().FontSize(12);
             col.Item().AlignCenter().Text($"Ročné vyúčtovanie platieb za rok {b.Rok} – {(p.Typ == TypPriestoru.Byt ? "byt" : "nebytový priestor")} č. {p.Cislo}").Bold().FontSize(11);
+            if (b.JeCastRoka)
+                col.Item().AlignCenter().Text($"za obdobie vlastníctva {Datum(b.ObdobieOd)} – {Datum(b.ObdobieDo)} (náklady a zálohy pomerne podľa dní)").FontSize(8.5f).Italic();
 
             // údaje o byte
             col.Item().Table(t =>
@@ -61,7 +63,7 @@ public static class PdfVyuctovanie
                     t.Cell().PaddingVertical(1).Text(nazov).FontColor(Colors.Grey.Darken2);
                     t.Cell().PaddingVertical(1).Text(hodnota).Bold();
                 }
-                Pole("Vlastník:", p.MenaVlastnikov);
+                Pole("Vlastník:", b.Vlastnik);
                 Pole("Plocha bytu:", $"{p.Plocha.ToString("N2", Sk)} m²");
                 Pole("Poschodie:", p.Poschodie ?? "");
                 Pole("Plocha balkóna:", p.PlochaBalkona > 0 ? $"{p.PlochaBalkona.ToString("N2", Sk)} m²" : "–");
@@ -198,11 +200,25 @@ public static class PdfVyuctovanie
                 t.Cell().Background(Tlmene).Element(Bunka).AlignRight().Text(Eur(Math.Abs(b.Vysledok))).Bold().FontSize(11);
             });
             if (b.Vysledok < 0)
-                col.Item().Text(t =>
+                col.Item().Row(row =>
                 {
-                    t.Span($"Sumu uhraďte do {n.SplatnostDni} dní odo dňa doručenia tohto vyúčtovania na účet ");
-                    t.Span(Iban.Formatuj(j.Iban)).Bold();
-                    t.Span($", VS = {p.VariabilnySymbol ?? p.Cislo}.");
+                    row.RelativeItem().AlignMiddle().Text(t =>
+                    {
+                        t.Span($"Sumu uhraďte do {n.SplatnostDni} dní odo dňa doručenia tohto vyúčtovania na účet ");
+                        t.Span(Iban.Formatuj(j.Iban)).Bold();
+                        t.Span($", VS = {p.VariabilnySymbol ?? p.Cislo}.");
+                        if (Iban.JePlatny(j.Iban)) t.Span(" Môžete zaplatiť aj naskenovaním QR kódu v mobilnej aplikácii banky.");
+                    });
+                    if (Iban.JePlatny(j.Iban))
+                    {
+                        row.ConstantItem(10);
+                        row.ConstantItem(90).Column(c =>
+                        {
+                            c.Item().Image(PayBySquare.QrPng(new PlatbaQr(j.Iban!, Math.Abs(b.Vysledok), p.VariabilnySymbol ?? p.Cislo,
+                                Poznamka: $"Vyuctovanie {b.Rok} byt {p.Cislo}", Prijemca: j.Nazov)));
+                            c.Item().AlignCenter().Text("PAY by square").FontSize(6.5f).FontColor(Colors.Grey.Darken1);
+                        });
+                    }
                 });
             else if (b.Vysledok > 0)
                 col.Item().Text("Preplatok vám bude vrátený na účet, z ktorého platíte zálohy, alebo započítaný podľa rozhodnutia spoločenstva.");
@@ -220,17 +236,17 @@ public static class PdfVyuctovanie
         });
     }
 
-    static void Riadok(ColumnDescriptor c, string nazov, string hodnota, bool tucne = false) =>
+    internal static void Riadok(ColumnDescriptor c, string nazov, string hodnota, bool tucne = false) =>
         c.Item().Row(r =>
         {
             r.RelativeItem().Text(nazov).Bold(tucne);
             r.AutoItem().Text(hodnota).Bold(tucne);
         });
 
-    static IContainer Hlavicka(IContainer c) =>
+    internal static IContainer Hlavicka(IContainer c) =>
         c.Border(0.5f).BorderColor(Ram).Background(Tlmene).PaddingVertical(2).PaddingHorizontal(3).AlignMiddle();
 
-    static IContainer Bunka(IContainer c) =>
+    internal static IContainer Bunka(IContainer c) =>
         c.Border(0.5f).BorderColor(Ram).PaddingVertical(1.5f).PaddingHorizontal(3);
 }
 

@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<PredpisPolozky> Predpisy => Set<PredpisPolozky>();
     public DbSet<PriestorRok> PriestorRoky => Set<PriestorRok>();
     public DbSet<Uhrada> Uhrady => Set<Uhrada>();
+    public DbSet<PohybFondu> PohybyFondu => Set<PohybFondu>();
+    public DbSet<Nastavenie> Nastavenia => Set<Nastavenie>();
 
     public static AppDbContext Open(string dbPath)
     {
@@ -63,6 +65,13 @@ public class AppDbContext : DbContext
         {
             e.ToTable("Uhrady");
             e.HasIndex(u => u.Datum);
+        });
+        b.Entity<Priestor>().Ignore(p => p.SucasniVlastnici);
+        b.Entity<PohybFondu>().ToTable("PohybyFondu");
+        b.Entity<Nastavenie>(e =>
+        {
+            e.ToTable("Nastavenia");
+            e.HasIndex(n => n.Kluc).IsUnique();
         });
     }
 }

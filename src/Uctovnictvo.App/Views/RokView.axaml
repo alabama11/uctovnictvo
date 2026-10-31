@@ -6,6 +6,8 @@
     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,4,0,6">
       <TextBlock Classes="popis" VerticalAlignment="Center" Text="{Binding Rok, StringFormat='Údaje za rok {0}. Rok zmeníte vpravo hore.'}" />
       <Button Command="{Binding KopirujZMinulehoRokaCommand}" ToolTip.Tip="Predpisy, poistné, konečné stavy vodomerov a výsledok vyúčtovania minulého roka">Prevziať z minulého roka…</Button>
+      <Button Command="{Binding PredpisyPdfCommand}">Evidenčné listy (PDF)…</Button>
+      <Button Command="{Binding PredpisyEmailCommand}" IsEnabled="{Binding !Odosiela}">Poslať predpisy e-mailom…</Button>
     </StackPanel>
     <TabControl>
       <TabItem Header="Predpisy záloh">
@@ -37,6 +39,7 @@
               <DataGridTextColumn Header="Stav m³" Binding="{Binding StavZaciatok, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo" />
               <DataGridTextColumn Header="Odpočet do" Binding="{Binding DatumKoniec, Converter={StaticResource Datum}}" Width="110" />
               <DataGridTextColumn Header="Stav m³" Binding="{Binding StavKoniec, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Starý vodomer m³" Binding="{Binding SpotrebaVymeneny, Converter={StaticResource M3}}" Width="130" CellStyleClasses="cislo" />
               <DataGridTextColumn Header="Spotreba m³" Binding="{Binding Spotreba, Converter={StaticResource M3}}" IsReadOnly="True" Width="110" CellStyleClasses="cislo" />
               <DataGridTextColumn Header="Poistné – predpis €" Binding="{Binding PoistnePredpis, Converter={StaticResource Eur}}" Width="150" CellStyleClasses="cislo" />
               <DataGridTextColumn Header="Zostatok min. roka €" Binding="{Binding ZostatokMinulyRok, Converter={StaticResource Eur}}" Width="160" CellStyleClasses="cislo" />

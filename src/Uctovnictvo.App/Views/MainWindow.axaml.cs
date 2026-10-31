@@ -16,7 +16,7 @@ public partial class MainWindow : Window, IDialogy
         {
             if (DataContext is MainViewModel vm) vm.Dialogy = this;
         };
-        Closing += (_, _) => (DataContext as MainViewModel)?.Uloz();
+        Closing += (_, _) => (DataContext as MainViewModel)?.Koniec();
         Zalozky.SelectionChanged += (_, e) =>
         {
             if (e.Source == Zalozky) (DataContext as MainViewModel)?.Uloz();
@@ -70,6 +70,24 @@ public partial class MainWindow : Window, IDialogy
     public Task Sprava(string titulok, string text) => Dialog.Ukaz(this, titulok, text, false);
 
     public Task<bool> Potvrd(string titulok, string text) => Dialog.Ukaz(this, titulok, text, true);
+
+    public Task<(string Predmet, string Text)?> TextEmailu(string titulok, string info, string predmet, string text) =>
+        Dialog.TextEmailu(this, titulok, info, predmet, text);
+
+    public Task<string?> VstupnyText(string titulok, string otazka, string predvolene) =>
+        Dialog.Vstup(this, titulok, otazka, predvolene);
+
+    async void NastaveniaEmailu(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+        await new NastaveniaEmailuWindow(Vm).ShowDialog(this);
+    }
+
+    async void NastaveniaZaloh(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+        await new NastaveniaZalohWindow(Vm).ShowDialog(this);
+    }
 
     public Task<bool> ImportPlatieb(IReadOnlyList<ImportRiadok> riadky, IReadOnlyList<Priestor> priestory) =>
         new ImportWindow(riadky, priestory).ShowDialog<bool>(this);

@@ -30,11 +30,11 @@ void Snimka(string nazov)
 }
 
 var zalozky = w.FindControl<TabControl>("Zalozky")!;
-string[] mena = { "1-udaje", "2-byty", "3-polozky", "4-predpisy", "5-uhrady", "6-vyuctovanie" };
+string[] mena = { "1-udaje", "2-byty", "3-polozky", "4-predpisy", "5-uhrady", "6-konto", "7-vyuctovanie", "8-fond" };
 for (int i = 0; i < mena.Length; i++)
 {
     zalozky.SelectedIndex = i;
-    if (i == 5) vm.VypocitajCommand.Execute(null);
+    if (i == 6) vm.VypocitajCommand.Execute(null);
     Snimka(mena[i]);
 }
 // vnorené záložky roka

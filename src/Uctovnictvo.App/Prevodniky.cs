@@ -59,6 +59,9 @@ public class EnumTextPrevodnik : IValueConverter
         TypPriestoru.NebytovyPriestor => "nebytový priestor",
         KlucRozpoctu k => Core.Services.Vyuctovanie.NazovKluca(k),
         UcelUhrady u => Core.Services.ExportExcel.NazovUcelu(u),
+        TypPohybuFondu.PociatocnyStav => "počiatočný stav",
+        TypPohybuFondu.Cerpanie => "čerpanie (výdavok)",
+        TypPohybuFondu.InyPrijem => "iný príjem",
         null => "",
         _ => value.ToString() ?? "",
     };
@@ -73,6 +76,7 @@ public static class Zoznamy
     public static TypPriestoru[] TypyPriestorov { get; } = Enum.GetValues<TypPriestoru>();
     public static KlucRozpoctu[] Kluce { get; } = Enum.GetValues<KlucRozpoctu>();
     public static UcelUhrady[] Ucely { get; } = Enum.GetValues<UcelUhrady>();
+    public static TypPohybuFondu[] TypyPohybuFondu { get; } = Enum.GetValues<TypPohybuFondu>();
 }
 
 public class IbanKontrolaPrevodnik : IValueConverter

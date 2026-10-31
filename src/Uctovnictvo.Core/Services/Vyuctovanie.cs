@@ -33,8 +33,16 @@ public record VyuctovanieBytu(
     decimal ZostatokMinulyRok,
     decimal ZaplateneMinulyRok,
     decimal PoistnePredpis,
-    decimal PoistneZaplatene)
+    decimal PoistneZaplatene,
+    string Vlastnik,
+    DateOnly? ObdobieOd = null,
+    DateOnly? ObdobieDo = null)
 {
+    /// <summary>Byt zmenil počas roka vlastníka – toto vyúčtovanie je len za časť roka.</summary>
+    public bool JeCastRoka => ObdobieOd is not null;
+    /// <summary>Vlastníci, ktorým vyúčtovanie patrí (kvôli e-mailu).</summary>
+    public IReadOnlyList<Vlastnik> Adresati { get; init; } = Array.Empty<Vlastnik>();
+
     public decimal PredpisZaloh => Polozky.Sum(p => p.Zaloha);
     public decimal ZaplateneZalohy => Mesiace.Sum(m => m.ZaplateneZalohy);
     /// <summary>Zaplatené mínus predpísané zálohy (− = vlastník nezaplatil celý predpis).</summary>
@@ -114,37 +122,91 @@ public static class Vyuctovanie
             if (vodaKat is not null && NakladDomu(vodaKat, rok) != 0 && (pr?.StavVodomeruKoniec is null || pr.StavVodomeruZaciatok is null))
                 upozornenia.Add($"Priestor {p.Cislo} nemá odpočet vody za rok {rok}.");
 
-            var polozky = kat.Select(k => new PolozkaVyuctovania(
+            var plne = kat.Select(k => new PolozkaVyuctovania(
                 k, k.JeFondOprav ? 0m : NakladDomu(k, rok), Predpis(p, k, rok),
                 skutocne.TryGetValue((k.Id, p.Id), out var s) ? s : 0m)).ToList();
 
-            var uhrady = p.Uhrady.Where(u => u.Datum.Year == rok).ToList();
-            var mesacnyPredpis = Math.Round(polozky.Sum(x => x.Zaloha) / 12m, 2, MidpointRounding.AwayFromZero);
-            var mesiace = Enumerable.Range(1, 12).Select(m => new MesiacVyuctovania(m, mesacnyPredpis,
-                uhrady.Where(u => u.Datum.Month == m && u.Ucel == UcelUhrady.Zalohy).Sum(u => u.Suma),
-                uhrady.Where(u => u.Datum.Month == m && u.Ucel == UcelUhrady.Poistne).Sum(u => u.Suma),
-                uhrady.Where(u => u.Datum.Month == m && u.Ucel == UcelUhrady.MinulyRok).Sum(u => u.Suma))).ToList();
-
-            VodaVyuctovania? voda = null;
-            if (vodaKat is not null)
+            var obdobia = ObdobiaVlastnictva(p, rok);
+            if (obdobia.Count > 1)
+                upozornenia.Add($"Priestor {p.Cislo} zmenil v roku {rok} vlastníka – vyúčtovanie je rozdelené pomerne podľa dní vlastníctva.");
+            for (int i = 0; i < obdobia.Count; i++)
             {
-                var historia = p.Roky.Where(r => r.Rok < rok && r.StavVodomeruKoniec is not null)
-                    .OrderBy(r => r.Rok).TakeLast(4).Select(r => (r.Rok, r.SpotrebaVody)).ToList();
-                var polozkaVody = polozky.First(x => x.Kategoria.Id == vodaKat.Id);
-                voda = new VodaVyuctovania(p.CisloVodomeru,
-                    pr?.DatumOdpoctuZaciatok, pr?.StavVodomeruZaciatok, pr?.DatumOdpoctuKoniec, pr?.StavVodomeruKoniec,
-                    pr?.SpotrebaVody ?? 0m, Math.Round(cenaVody, 2, MidpointRounding.AwayFromZero),
-                    polozkaVody.Skutocne, polozkaVody.Zaloha, historia);
-            }
+                var (od, @do, vlastnici) = obdobia[i];
+                var celyRok = obdobia.Count == 1;
+                var podiel = celyRok ? 1m : (decimal)(@do.DayNumber - od.DayNumber + 1) / (new DateOnly(rok, 12, 31).DayNumber - new DateOnly(rok, 1, 1).DayNumber + 1);
+                decimal Cast(decimal x) => celyRok ? x : Math.Round(x * podiel, 2, MidpointRounding.AwayFromZero);
+                var polozky = plne.Select(x => x with { Zaloha = Cast(x.Zaloha), Skutocne = Cast(x.Skutocne) }).ToList();
 
-            byty.Add(new VyuctovanieBytu(p, rok, polozky, mesiace, voda,
-                pr?.ZostatokMinulyRok ?? 0m,
-                uhrady.Where(u => u.Ucel == UcelUhrady.MinulyRok).Sum(u => u.Suma),
-                pr?.PoistnePredpis ?? 0m,
-                uhrady.Where(u => u.Ucel == UcelUhrady.Poistne).Sum(u => u.Suma)));
+                var uhrady = p.Uhrady.Where(u => u.Datum >= od && u.Datum <= @do).ToList();
+                var mesacnyPlny = Math.Round(plne.Sum(x => x.Zaloha) / 12m, 2, MidpointRounding.AwayFromZero);
+                var mesiace = Enumerable.Range(1, 12).Select(m =>
+                {
+                    var zac = new DateOnly(rok, m, 1);
+                    var kon = zac.AddMonths(1).AddDays(-1);
+                    var dniVObdobi = Math.Max(0, Math.Min(kon.DayNumber, @do.DayNumber) - Math.Max(zac.DayNumber, od.DayNumber) + 1);
+                    var predpis = celyRok ? mesacnyPlny : Math.Round(mesacnyPlny * dniVObdobi / (kon.Day), 2, MidpointRounding.AwayFromZero);
+                    return new MesiacVyuctovania(m, predpis,
+                        uhrady.Where(u => u.Datum.Month == m && u.Ucel == UcelUhrady.Zalohy).Sum(u => u.Suma),
+                        uhrady.Where(u => u.Datum.Month == m && u.Ucel == UcelUhrady.Poistne).Sum(u => u.Suma),
+                        uhrady.Where(u => u.Datum.Month == m && u.Ucel == UcelUhrady.MinulyRok).Sum(u => u.Suma));
+                }).ToList();
+
+                VodaVyuctovania? voda = null;
+                if (vodaKat is not null)
+                {
+                    var historia = p.Roky.Where(r => r.Rok < rok && r.StavVodomeruKoniec is not null)
+                        .OrderBy(r => r.Rok).TakeLast(4).Select(r => (r.Rok, r.SpotrebaVody)).ToList();
+                    var polozkaVody = polozky.First(x => x.Kategoria.Id == vodaKat.Id);
+                    voda = new VodaVyuctovania(p.CisloVodomeru,
+                        pr?.DatumOdpoctuZaciatok, pr?.StavVodomeruZaciatok, pr?.DatumOdpoctuKoniec, pr?.StavVodomeruKoniec,
+                        Cast(pr?.SpotrebaVody ?? 0m), Math.Round(cenaVody, 2, MidpointRounding.AwayFromZero),
+                        polozkaVody.Skutocne, polozkaVody.Zaloha, historia);
+                }
+
+                // zostatok minulého roka a poistné patria tomu, kto bol vlastníkom na začiatku roka
+                var prvy = i == 0;
+                byty.Add(new VyuctovanieBytu(p, rok, polozky, mesiace, voda,
+                    prvy ? pr?.ZostatokMinulyRok ?? 0m : 0m,
+                    uhrady.Where(u => u.Ucel == UcelUhrady.MinulyRok).Sum(u => u.Suma),
+                    prvy ? pr?.PoistnePredpis ?? 0m : 0m,
+                    uhrady.Where(u => u.Ucel == UcelUhrady.Poistne).Sum(u => u.Suma),
+                    vlastnici.Count > 0 ? string.Join(", ", vlastnici.Select(v => v.Meno)) : "",
+                    celyRok ? null : od,
+                    celyRok ? null : @do)
+                { Adresati = vlastnici });
+            }
         }
 
         return new VysledokVyuctovania(rok, byty, upozornenia);
+    }
+
+    /// <summary>
+    /// Rozdelí rok podľa dátumov „vlastníkom od/do“. Bez zmeny vlastníka vráti jedno obdobie za celý rok.
+    /// </summary>
+    public static List<(DateOnly Od, DateOnly Do, List<Vlastnik> Vlastnici)> ObdobiaVlastnictva(Priestor p, int rok)
+    {
+        var zac = new DateOnly(rok, 1, 1);
+        var kon = new DateOnly(rok, 12, 31);
+        var hranice = new SortedSet<DateOnly> { zac };
+        foreach (var v in p.Vlastnici)
+        {
+            if (v.VlastnikOd is { } od && od > zac && od <= kon) hranice.Add(od);
+            if (v.VlastnikDo is { } d && d >= zac && d < kon) hranice.Add(d.AddDays(1));
+        }
+        var body = hranice.ToList();
+        var vysledok = new List<(DateOnly, DateOnly, List<Vlastnik>)>();
+        for (int i = 0; i < body.Count; i++)
+        {
+            var od = body[i];
+            var @do = i + 1 < body.Count ? body[i + 1].AddDays(-1) : kon;
+            var vlastnici = p.Vlastnici.Where(v => v.JeVlastnikom(od)).OrderByDescending(v => v.Hlavny).ThenBy(v => v.Id).ToList();
+            // nadväzujúce obdobia s rovnakými vlastníkmi spojíme
+            if (vysledok.Count > 0 && vysledok[^1].Item3.SequenceEqual(vlastnici))
+                vysledok[^1] = (vysledok[^1].Item1, @do, vlastnici);
+            else
+                vysledok.Add((od, @do, vlastnici));
+        }
+        return vysledok;
     }
 
     public static decimal NakladDomu(KategoriaNakladov k, int rok) => k.Naklady.Where(n => n.Rok == rok).Sum(n => n.Suma);

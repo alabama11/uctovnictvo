@@ -86,7 +86,12 @@ public class Priestor
     public List<PredpisPolozky> Predpisy { get; set; } = new();
     public List<Uhrada> Uhrady { get; set; } = new();
 
-    public string MenaVlastnikov => string.Join(", ", Vlastnici.OrderByDescending(v => v.Hlavny).Select(v => v.Meno));
+    /// <summary>Súčasní vlastníci (bez tých, ktorí byt predali).</summary>
+    public string MenaVlastnikov => string.Join(", ", SucasniVlastnici.Select(v => v.Meno));
+
+    public IEnumerable<Vlastnik> SucasniVlastnici =>
+        Vlastnici.Where(v => v.VlastnikDo is null || v.VlastnikDo >= DateOnly.FromDateTime(DateTime.Today))
+            .OrderByDescending(v => v.Hlavny).ThenBy(v => v.Id);
 }
 
 public class Vlastnik
@@ -103,6 +108,12 @@ public class Vlastnik
     public string? Telefon { get; set; }
     /// <summary>Kontaktná osoba, ktorej sa posiela vyúčtovanie.</summary>
     public bool Hlavny { get; set; } = true;
+    /// <summary>Od kedy je vlastníkom (prázdne = odjakživa). Pri predaji bytu sa vyúčtovanie delí podľa týchto dátumov.</summary>
+    public DateOnly? VlastnikOd { get; set; }
+    /// <summary>Do kedy bol vlastníkom (prázdne = stále je).</summary>
+    public DateOnly? VlastnikDo { get; set; }
+
+    public bool JeVlastnikom(DateOnly den) => (VlastnikOd is null || VlastnikOd <= den) && (VlastnikDo is null || VlastnikDo >= den);
     public string? Poznamka { get; set; }
 
     public List<BankovyUcet> Ucty { get; set; } = new();
@@ -172,6 +183,8 @@ public class PriestorRok
     public decimal? StavVodomeruZaciatok { get; set; }
     public DateOnly? DatumOdpoctuKoniec { get; set; }
     public decimal? StavVodomeruKoniec { get; set; }
+    /// <summary>Spotreba nameraná na starom vodomere, ak sa počas roka menil (m³).</summary>
+    public decimal SpotrebaVymenenyVodomer { get; set; }
 
     /// <summary>Predpis ročného poistenia bytu.</summary>
     public decimal PoistnePredpis { get; set; }
@@ -180,7 +193,7 @@ public class PriestorRok
     public decimal ZostatokMinulyRok { get; set; }
 
     public decimal SpotrebaVody =>
-        StavVodomeruZaciatok is { } z && StavVodomeruKoniec is { } k ? k - z : 0m;
+        (StavVodomeruZaciatok is { } z && StavVodomeruKoniec is { } k ? k - z : 0m) + SpotrebaVymenenyVodomer;
 }
 
 public class Uhrada
@@ -195,4 +208,32 @@ public class Uhrada
     public string? IbanPlatitela { get; set; }
     public string? VariabilnySymbol { get; set; }
     public string? Poznamka { get; set; }
+}
+
+public enum TypPohybuFondu
+{
+    PociatocnyStav = 0,
+    Cerpanie = 1,
+    InyPrijem = 2,
+}
+
+/// <summary>Pohyb vo fonde prevádzky, údržby a opráv mimo predpisov vlastníkov (čerpanie na opravy, úroky, počiatočný stav).</summary>
+public class PohybFondu
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public DateOnly Datum { get; set; }
+    public TypPohybuFondu Typ { get; set; }
+    public string Popis { get; set; } = "";
+    /// <summary>Kladná suma; pri čerpaní sa odpočíta.</summary>
+    public decimal Suma { get; set; }
+}
+
+/// <summary>Nastavenia programu (e-mail, zálohy) ako dvojice kľúč – hodnota.</summary>
+public class Nastavenie
+{
+    public int Id { get; set; }
+    public string Kluc { get; set; } = "";
+    public string? Hodnota { get; set; }
 }
