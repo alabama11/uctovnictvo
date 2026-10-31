@@ -48,6 +48,13 @@ SZČO a s.r.o. Plán fáz: https://claude.ai/artifact/1kTvw5b8YGGokzXtbfffMn
 - hlavná kniha a obratová predvaha, saldokonto k 31. 12.
 - účtovná závierka mikro účtovnej jednotky v štruktúre Úč MÚJ (súvaha r. 01–45, výkaz ziskov a strát r. 01–38, netto, bežné a minulé obdobie) s kontrolami; PDF a Excel – podklad na vyplnenie formulára vo Finančnej správe
 
+## Verzia 0.6 – podklady k daňovým priznaniam
+
+- SZČO: DP FO typ B z daňovej evidencie – skutočné alebo paušálne výdavky (60 %, max. 20 000 €) + poistné, odpočet straty, nezdaniteľná časť na daňovníka, III. pilier, sadzba 15 % / pásma, daňový bonus, preddavky; hodnoty po riadkoch tlačiva
+- s.r.o.: DP PO z podvojného účtovníctva – VH pred zdanením, nedaňové náklady (účty označené ako nedaňové), sadzba 10 / 21 / 24 %, minimálna daň, preddavky, zaúčtovanie dane 591/341
+- parametre pre roky 2025 a 2026 overené na podpora.financnasprava.sk; PDF podklad na prepis do eFormulára FS
+- XML na import do eDane zatiaľ nie je (chýba overená schéma)
+
 Údaje sú v `Dokumenty\Uctovnictvo\uctovnictvo.db`.
 
 ## Zostavenie

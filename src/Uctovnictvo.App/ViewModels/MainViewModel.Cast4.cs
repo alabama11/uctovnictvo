@@ -99,6 +99,7 @@ public partial class MainViewModel
                            $"Výsledok hospodárenia: {PdfVyuctovanie.Eur(Podvojne.VysledokHospodarenia(pv))}   Aktíva: {PdfVyuctovanie.Eur(aktiva)}" +
                            (k.Count > 0 ? $"   ⚠ {k.Count} upozornenie(a) – pozri Závierku" : "") + (RokUzamknuty ? "   🔒 uzamknutý" : "");
         NacitajSaldokonto();
+        if (VstupyDp is not null && VybranaJednotka?.Typ == TypJednotky.Sro) PrepocitajDp();
     }
 
     List<string> KontrolyUctovnictva(IReadOnlyList<RiadokVykazu> suv, IReadOnlyList<ObratUctu> pv)

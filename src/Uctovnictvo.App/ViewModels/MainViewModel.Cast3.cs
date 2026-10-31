@@ -59,6 +59,7 @@ public partial class MainViewModel
         VybraneVozidlo = Vozidla.FirstOrDefault(v => v.Id == vybrane) ?? Vozidla.FirstOrDefault();
         NacitajDennik();
         NacitajCast4();
+        NacitajCast5();
     }
 
     // ---------- peňažný denník ----------
@@ -86,6 +87,7 @@ public partial class MainViewModel
                                 $" + odpisy {PdfVyuctovanie.Eur(s.Odpisy)} + cestovné {PdfVyuctovanie.Eur(s.CestovneNahrady)}   " +
                                 $"Rozdiel: {PdfVyuctovanie.Eur(s.Vysledok)}" +
                                 (s.Nezaradene != 0 ? $"   ⚠ Nezaradené: {PdfVyuctovanie.Eur(s.Nezaradene)}" : "");
+        if (VstupyDp is not null && JeSzco) PrepocitajDp();
     }
 
     [RelayCommand]
