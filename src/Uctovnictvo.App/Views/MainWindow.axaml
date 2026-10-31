@@ -23,7 +23,7 @@
         <MenuItem Header="_Koniec" Click="Koniec" />
       </MenuItem>
       <MenuItem Header="_Pomocník">
-        <MenuItem Header="Vytvoriť _ukážkové spoločenstvo" Command="{Binding VytvorUkazkuCommand}" />
+        <MenuItem Header="Vytvoriť _ukážkové údaje (spoločenstvo a firma)" Command="{Binding VytvorUkazkuCommand}" />
         <Separator />
         <MenuItem Header="_O programe" Click="OProgramme" />
       </MenuItem>
