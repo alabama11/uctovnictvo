@@ -94,11 +94,17 @@
           <TabItem Header="Fond opráv" IsVisible="{Binding JeSpolocenstvo}">
             <v:FondView />
           </TabItem>
-          <TabItem Header="Faktúry a účtovníctvo" IsVisible="{Binding JeFirma}">
-            <StackPanel Margin="4,10" Spacing="8" MaxWidth="640" HorizontalAlignment="Left">
-              <TextBlock Classes="nadpis" Text="Pripravuje sa" />
-              <TextBlock Classes="popis" Text="Vystavovanie faktúr pribudne vo fáze 2, jednoduché účtovníctvo / daňová evidencia vo fáze 3 a podvojné účtovníctvo s daňovými priznaniami vo fázach 4 a 5. Údaje firmy, ktoré zadáte teraz, sa v nich použijú." />
-            </StackPanel>
+          <TabItem Header="Faktúry">
+            <v:FakturyView />
+          </TabItem>
+          <TabItem Header="Adresár">
+            <v:AdresarView />
+          </TabItem>
+          <TabItem Header="Banka" IsVisible="{Binding JeFirma}">
+            <v:BankaView />
+          </TabItem>
+          <TabItem Header="Pokladňa">
+            <v:PokladnaView />
           </TabItem>
         </TabControl>
       </DockPanel>

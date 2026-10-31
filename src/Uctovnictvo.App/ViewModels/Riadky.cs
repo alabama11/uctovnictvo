@@ -105,6 +105,9 @@ public partial class NakladRiadok : ObservableObject
         + (string.IsNullOrWhiteSpace(Kategoria.LenPriestory) ? "" : $", len {Kategoria.LenPriestory}");
     public bool Upravitelne => !Kategoria.JeFondOprav;
 
+    /// <summary>Súčet prijatých faktúr zaradených do tejto kategórie (null = žiadne).</summary>
+    [ObservableProperty] private decimal? zFaktur;
+
     public decimal Suma
     {
         get => Kategoria.Naklady.FirstOrDefault(n => n.Rok == rok)?.Suma ?? 0m;

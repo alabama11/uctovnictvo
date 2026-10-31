@@ -165,6 +165,7 @@ public partial class MainViewModel : ObservableObject
         VyuctovanieBytov.Clear();
         Upozornenia.Clear();
         SumaVyuctovania = "";
+        NacitajCast2();
         if (!JeSpolocenstvo)
         {
             Uhrady.Clear();
@@ -181,6 +182,7 @@ public partial class MainViewModel : ObservableObject
             NakladRiadky.Add(new NakladRiadok(db, k, Rok));
         NacitajUhrady();
         NacitajKontoAFond();
+        ObnovNakladyZFaktur();
         KategorieZmenene?.Invoke();
     }
 
@@ -615,8 +617,9 @@ public partial class MainViewModel : ObservableObject
     {
         Uloz();
         var j = Ukazka.Vytvor(db, Rok);
+        if (!db.Jednotky.Any(x => x.Typ != TypJednotky.Spolocenstvo)) Ukazka.VytvorFirmu(db, Rok);
         NacitajJednotky(j.Id);
-        Stav = "Vytvorené ukážkové spoločenstvo – môžete si v ňom všetko vyskúšať a potom ho zmazať.";
+        Stav = "Vytvorené ukážkové spoločenstvo a firma – môžete si v nich všetko vyskúšať a potom ich zmazať.";
     }
 
     // ---------- záloha ----------

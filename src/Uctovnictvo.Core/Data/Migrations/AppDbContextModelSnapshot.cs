@@ -17,6 +17,45 @@ namespace Uctovnictvo.Core.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyPohyb", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Popis")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProtiIban")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProtiNazov")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Referencia")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Suma")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VariabilnySymbol")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId", "Datum");
+
+                    b.HasIndex("JednotkaId", "Referencia");
+
+                    b.ToTable("BankovePohyby", (string)null);
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyUcet", b =>
                 {
                     b.Property<int>("Id")
@@ -40,6 +79,95 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.HasIndex("VlastnikId");
 
                     b.ToTable("BankoveUcty", (string)null);
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Faktura", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Cislo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CisloDodavatela")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("DatumDodania")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("DatumSplatnosti")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("DatumUpomienky")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("DatumVystavenia")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Druh")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FormaUhrady")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("KategoriaNakladovId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("KonstantnySymbol")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartnerAdresa")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartnerDic")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartnerIban")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartnerIcDph")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PartnerIco")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PartnerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PartnerNazov")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PovodnaFaktura")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TextNad")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TextPod")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Typ")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("VariabilnySymbol")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KategoriaNakladovId");
+
+                    b.HasIndex("PartnerId");
+
+                    b.HasIndex("JednotkaId", "Druh", "Cislo")
+                        .IsUnique();
+
+                    b.ToTable("Faktury", (string)null);
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.KategoriaNakladov", b =>
@@ -118,6 +246,59 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.ToTable("Nastavenia", (string)null);
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Partner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Dic")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Iban")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IcDph")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ico")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Nazov")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Obec")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Poznamka")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Psc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Telefon")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ulica")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId", "Ico");
+
+                    b.ToTable("Partneri", (string)null);
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.PohybFondu", b =>
                 {
                     b.Property<int>("Id")
@@ -145,6 +326,75 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.HasIndex("JednotkaId");
 
                     b.ToTable("PohybyFondu", (string)null);
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PokladnicnyDoklad", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Cislo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Druh")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Osoba")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Suma")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ucel")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId", "Cislo")
+                        .IsUnique();
+
+                    b.ToTable("PokladnicneDoklady", (string)null);
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PolozkaFaktury", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("CenaZaJednotku")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FakturaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Jednotka")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Mnozstvo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Popis")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Poradie")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FakturaId");
+
+                    b.ToTable("PolozkyFaktur", (string)null);
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.PredpisPolozky", b =>
@@ -282,6 +532,10 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FormatCislaFaktury")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Iban")
                         .HasColumnType("TEXT");
 
@@ -298,11 +552,17 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Property<string>("Obec")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal>("PokladnaPociatocnyStav")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Poznamka")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Psc")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("SplatnostDni")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Statutar")
                         .HasColumnType("TEXT");
@@ -314,6 +574,9 @@ namespace Uctovnictvo.Core.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Ulica")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ZapisVRegistri")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -355,6 +618,41 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.HasIndex("PriestorId");
 
                     b.ToTable("Uhrady", (string)null);
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.UhradaFaktury", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("BankovyPohybId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Datum")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("FakturaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("PokladnicnyDokladId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Poznamka")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Suma")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BankovyPohybId");
+
+                    b.HasIndex("FakturaId");
+
+                    b.HasIndex("PokladnicnyDokladId");
+
+                    b.ToTable("UhradyFaktur", (string)null);
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.Vlastnik", b =>
@@ -404,6 +702,17 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.ToTable("Vlastnici", (string)null);
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyPohyb", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyUcet", b =>
                 {
                     b.HasOne("Uctovnictvo.Core.Model.Vlastnik", "Vlastnik")
@@ -413,6 +722,31 @@ namespace Uctovnictvo.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Vlastnik");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Faktura", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Uctovnictvo.Core.Model.KategoriaNakladov", "KategoriaNakladov")
+                        .WithMany()
+                        .HasForeignKey("KategoriaNakladovId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Uctovnictvo.Core.Model.Partner", "Partner")
+                        .WithMany()
+                        .HasForeignKey("PartnerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Jednotka");
+
+                    b.Navigation("KategoriaNakladov");
+
+                    b.Navigation("Partner");
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.KategoriaNakladov", b =>
@@ -437,6 +771,17 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Navigation("Kategoria");
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Partner", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.PohybFondu", b =>
                 {
                     b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
@@ -446,6 +791,28 @@ namespace Uctovnictvo.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Jednotka");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PokladnicnyDoklad", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PolozkaFaktury", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.Faktura", "Faktura")
+                        .WithMany("Polozky")
+                        .HasForeignKey("FakturaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Faktura");
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.PredpisPolozky", b =>
@@ -500,6 +867,31 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Navigation("Priestor");
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.UhradaFaktury", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.BankovyPohyb", "BankovyPohyb")
+                        .WithMany("Uhrady")
+                        .HasForeignKey("BankovyPohybId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Uctovnictvo.Core.Model.Faktura", "Faktura")
+                        .WithMany("Uhrady")
+                        .HasForeignKey("FakturaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Uctovnictvo.Core.Model.PokladnicnyDoklad", "PokladnicnyDoklad")
+                        .WithMany("Uhrady")
+                        .HasForeignKey("PokladnicnyDokladId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("BankovyPohyb");
+
+                    b.Navigation("Faktura");
+
+                    b.Navigation("PokladnicnyDoklad");
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.Vlastnik", b =>
                 {
                     b.HasOne("Uctovnictvo.Core.Model.Priestor", "Priestor")
@@ -511,9 +903,26 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Navigation("Priestor");
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyPohyb", b =>
+                {
+                    b.Navigation("Uhrady");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Faktura", b =>
+                {
+                    b.Navigation("Polozky");
+
+                    b.Navigation("Uhrady");
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.KategoriaNakladov", b =>
                 {
                     b.Navigation("Naklady");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.PokladnicnyDoklad", b =>
+                {
+                    b.Navigation("Uhrady");
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.Priestor", b =>

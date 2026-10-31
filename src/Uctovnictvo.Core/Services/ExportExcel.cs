@@ -157,6 +157,74 @@ public static class ExportExcel
         wb.SaveAs(path);
     }
 
+    /// <summary>Jednoduchý hárok: hlavička + riadky; stĺpce s typom decimal dostanú formát eur, DateOnly formát dátumu.</summary>
+    static void Harok(XLWorkbook wb, string nazov, string titulok, string[] hlavicka, IEnumerable<object?[]> riadky)
+    {
+        var ws = wb.AddWorksheet(nazov);
+        ws.Cell(1, 1).Value = titulok;
+        ws.Cell(1, 1).Style.Font.SetBold().Font.SetFontSize(14);
+        for (int c = 0; c < hlavicka.Length; c++) ws.Cell(3, c + 1).Value = hlavicka[c];
+        ws.Row(3).Style.Font.SetBold();
+        int r = 3;
+        foreach (var riadok in riadky)
+        {
+            r++;
+            for (int c = 0; c < riadok.Length; c++)
+            {
+                var cell = ws.Cell(r, c + 1);
+                switch (riadok[c])
+                {
+                    case null: break;
+                    case decimal d: cell.Value = d; cell.Style.NumberFormat.Format = FormatEur; break;
+                    case DateOnly dt: cell.Value = dt.ToDateTime(TimeOnly.MinValue); cell.Style.NumberFormat.Format = "d.m.yyyy"; break;
+                    case int n: cell.Value = n; break;
+                    default: cell.Value = riadok[c]!.ToString(); break;
+                }
+            }
+        }
+        ws.SheetView.FreezeRows(3);
+        ws.Columns().AdjustToContents();
+    }
+
+    public static void KnihaFaktur(UctovnaJednotka j, IEnumerable<Faktura> faktury, int rok, string path)
+    {
+        using var wb = new XLWorkbook();
+        var dnes = DateOnly.FromDateTime(DateTime.Today);
+        string[] h = { "Číslo", "Typ", "Číslo dodávateľa", "Partner", "IČO", "VS", "Vystavená", "Dodanie", "Splatnosť", "Suma", "Uhradené", "Zostáva", "Stav" };
+        foreach (var druh in new[] { DruhFaktury.Vydana, DruhFaktury.Prijata })
+        {
+            var zoznam = faktury.Where(f => f.Druh == druh && f.DatumVystavenia.Year == rok).OrderBy(f => f.DatumVystavenia).ThenBy(f => f.Cislo);
+            Harok(wb, druh == DruhFaktury.Vydana ? "Vydané" : "Prijaté", $"{j.Nazov} – kniha {(druh == DruhFaktury.Vydana ? "vydaných" : "prijatých")} faktúr {rok}", h,
+                zoznam.Select(f => new object?[] { f.Cislo, Faktury.NazovTypu(f.Typ), f.CisloDodavatela, f.PartnerNazov, f.PartnerIco, f.VariabilnySymbol,
+                    f.DatumVystavenia, f.DatumDodania, f.DatumSplatnosti, f.Suma, f.Uhradene, f.Zostava, Faktury.Stav(f, dnes) }));
+        }
+        wb.SaveAs(path);
+    }
+
+    public static void BankovePohyby(UctovnaJednotka j, IEnumerable<BankovyPohyb> pohyby, int rok, string path)
+    {
+        using var wb = new XLWorkbook();
+        Harok(wb, $"Banka {rok}", $"{j.Nazov} – bankové pohyby {rok}",
+            new[] { "Dátum", "Suma", "Protiúčet", "Názov", "VS", "Popis", "Uhradené faktúry" },
+            pohyby.Where(p => p.Datum.Year == rok).OrderBy(p => p.Datum).Select(p => new object?[]
+            {
+                p.Datum, p.Suma, Iban.Formatuj(p.ProtiIban), p.ProtiNazov, p.VariabilnySymbol, p.Popis,
+                string.Join(", ", p.Uhrady.Select(u => u.Faktura?.Cislo)),
+            }));
+        wb.SaveAs(path);
+    }
+
+    public static void PokladnicnaKniha(UctovnaJednotka j, int rok, decimal zaciatok, IReadOnlyList<RiadokPokladne> riadky, string path)
+    {
+        using var wb = new XLWorkbook();
+        var zoznam = new List<object?[]> { new object?[] { null, null, $"Zostatok k 1. 1. {rok}", null, null, null, zaciatok } };
+        zoznam.AddRange(riadky.Select(r => new object?[] { r.Doklad.Datum, r.Doklad.Cislo, r.Doklad.Ucel, r.Doklad.Osoba,
+            r.Prijem == 0 ? null : r.Prijem, r.Vydavok == 0 ? null : r.Vydavok, r.Zostatok }));
+        Harok(wb, $"Pokladňa {rok}", $"{j.Nazov} – pokladničná kniha {rok}",
+            new[] { "Dátum", "Doklad", "Účel", "Osoba", "Príjem", "Výdavok", "Zostatok" }, zoznam);
+        wb.SaveAs(path);
+    }
+
     public static string NazovUcelu(UcelUhrady u) => u switch
     {
         UcelUhrady.Zalohy => "zálohy",

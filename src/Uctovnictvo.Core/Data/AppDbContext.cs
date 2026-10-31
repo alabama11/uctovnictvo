@@ -19,6 +19,12 @@ public class AppDbContext : DbContext
     public DbSet<Uhrada> Uhrady => Set<Uhrada>();
     public DbSet<PohybFondu> PohybyFondu => Set<PohybFondu>();
     public DbSet<Nastavenie> Nastavenia => Set<Nastavenie>();
+    public DbSet<Partner> Partneri => Set<Partner>();
+    public DbSet<Faktura> Faktury => Set<Faktura>();
+    public DbSet<PolozkaFaktury> PolozkyFaktur => Set<PolozkaFaktury>();
+    public DbSet<UhradaFaktury> UhradyFaktur => Set<UhradaFaktury>();
+    public DbSet<BankovyPohyb> BankovePohyby => Set<BankovyPohyb>();
+    public DbSet<PokladnicnyDoklad> PokladnicneDoklady => Set<PokladnicnyDoklad>();
 
     public static AppDbContext Open(string dbPath)
     {
@@ -72,6 +78,38 @@ public class AppDbContext : DbContext
         {
             e.ToTable("Nastavenia");
             e.HasIndex(n => n.Kluc).IsUnique();
+        });
+        b.Entity<Partner>(e =>
+        {
+            e.ToTable("Partneri");
+            e.HasIndex(p => new { p.JednotkaId, p.Ico });
+            e.Ignore(p => p.Adresa);
+        });
+        b.Entity<Faktura>(e =>
+        {
+            e.ToTable("Faktury");
+            e.HasIndex(f => new { f.JednotkaId, f.Druh, f.Cislo }).IsUnique();
+            e.HasOne(f => f.Partner).WithMany().HasForeignKey(f => f.PartnerId).OnDelete(DeleteBehavior.SetNull);
+            e.HasOne(f => f.KategoriaNakladov).WithMany().HasForeignKey(f => f.KategoriaNakladovId).OnDelete(DeleteBehavior.SetNull);
+            e.Ignore(f => f.Suma); e.Ignore(f => f.Uhradene); e.Ignore(f => f.Zostava); e.Ignore(f => f.JeUhradena);
+        });
+        b.Entity<PolozkaFaktury>(e => { e.ToTable("PolozkyFaktur"); e.Ignore(p => p.Suma); });
+        b.Entity<UhradaFaktury>(e =>
+        {
+            e.ToTable("UhradyFaktur");
+            e.HasOne(u => u.BankovyPohyb).WithMany(p => p.Uhrady).HasForeignKey(u => u.BankovyPohybId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(u => u.PokladnicnyDoklad).WithMany(p => p.Uhrady).HasForeignKey(u => u.PokladnicnyDokladId).OnDelete(DeleteBehavior.Cascade);
+        });
+        b.Entity<BankovyPohyb>(e =>
+        {
+            e.ToTable("BankovePohyby");
+            e.HasIndex(p => new { p.JednotkaId, p.Datum });
+            e.HasIndex(p => new { p.JednotkaId, p.Referencia });
+        });
+        b.Entity<PokladnicnyDoklad>(e =>
+        {
+            e.ToTable("PokladnicneDoklady");
+            e.HasIndex(p => new { p.JednotkaId, p.Cislo }).IsUnique();
         });
     }
 }

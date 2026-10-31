@@ -89,6 +89,58 @@ public static class Ukazka
         return j;
     }
 
+    /// <summary>Vymyslená s.r.o. s partnermi, faktúrami, bankou a pokladňou na vyskúšanie časti pre firmy.</summary>
+    public static UctovnaJednotka VytvorFirmu(AppDbContext db, int rok)
+    {
+        var j = new UctovnaJednotka
+        {
+            Typ = TypJednotky.Sro, Nazov = "Ukážková firma s.r.o.", Ico = "12345678", Dic = "2020123456",
+            Ulica = "Hlavná 5", Obec = "Žilina", Psc = "010 01", Iban = "SK3112000000198742637541",
+            Statutar = "Eva Ukážková", Email = "firma@example.sk",
+            ZapisVRegistri = "Zapísaná v Obchodnom registri Okresného súdu Žilina, oddiel Sro, vložka č. 99999/L",
+            PokladnaPociatocnyStav = 150m,
+        };
+        db.Jednotky.Add(j);
+        var odberatel = new Partner { Jednotka = j, Nazov = "Stavby Sever s.r.o.", Ico = "87654321", Ulica = "Priemyselná 12", Psc = "036 01", Obec = "Martin", Email = "uctaren@example.sk" };
+        var dodavatel = new Partner { Jednotka = j, Nazov = "Kancel servis a.s.", Ico = "11223344", Ulica = "Obchodná 3", Psc = "811 06", Obec = "Bratislava", Iban = UkazkovyIban(77) };
+        db.Partneri.AddRange(odberatel, dodavatel);
+
+        Faktura Vydana(string cislo, int mesiac, Partner p, params (string Popis, decimal Mn, string Mj, decimal Cena)[] polozky)
+        {
+            var f = new Faktura
+            {
+                Jednotka = j, Druh = DruhFaktury.Vydana, Cislo = cislo, VariabilnySymbol = cislo,
+                DatumVystavenia = new DateOnly(rok, mesiac, 3), DatumDodania = new DateOnly(rok, mesiac, 3), DatumSplatnosti = new DateOnly(rok, mesiac, 17),
+            };
+            Faktury.NastavPartnera(f, p);
+            var i = 1;
+            foreach (var x in polozky) f.Polozky.Add(new PolozkaFaktury { Poradie = i++, Popis = x.Popis, Mnozstvo = x.Mn, Jednotka = x.Mj, CenaZaJednotku = x.Cena });
+            db.Faktury.Add(f);
+            return f;
+        }
+        var f1 = Vydana($"{rok}0001", 2, odberatel, ("Projektová dokumentácia – rodinný dom", 1, "ks", 1200m), ("Konzultácie", 6, "hod", 35m));
+        Vydana($"{rok}0002", 9, odberatel, ("Stavebný dozor", 12, "hod", 40m));
+        var p1 = new Faktura
+        {
+            Jednotka = j, Druh = DruhFaktury.Prijata, Cislo = $"PF{rok}0001", CisloDodavatela = "2024-118", VariabilnySymbol = "2024118",
+            DatumVystavenia = new DateOnly(rok, 3, 10), DatumDodania = new DateOnly(rok, 3, 10), DatumSplatnosti = new DateOnly(rok, 3, 24),
+        };
+        Faktury.NastavPartnera(p1, dodavatel);
+        p1.Polozky.Add(new PolozkaFaktury { Poradie = 1, Popis = "Kancelárske potreby", Mnozstvo = 1, CenaZaJednotku = 86.10m });
+        db.Faktury.Add(p1);
+
+        var b1 = new BankovyPohyb { Jednotka = j, Datum = new DateOnly(rok, 2, 15), Suma = f1.Suma, ProtiNazov = odberatel.Nazov, VariabilnySymbol = f1.Cislo, Referencia = "ukazka-1", Popis = "Uhrada faktury" };
+        var b2 = new BankovyPohyb { Jednotka = j, Datum = new DateOnly(rok, 3, 31), Suma = -5.90m, Popis = "Poplatok za vedenie účtu", Referencia = "ukazka-2" };
+        db.BankovePohyby.AddRange(b1, b2);
+        Banka.Uhrad(f1, b1);
+        var d = Pokladna.ZFaktury(p1, new DateOnly(rok, 3, 12), Array.Empty<string>());
+        d.Jednotka = j;
+        db.PokladnicneDoklady.Add(d);
+        db.PokladnicneDoklady.Add(new PokladnicnyDoklad { Jednotka = j, Druh = DruhPokladnicnehoDokladu.Vydavok, Cislo = $"VPD{rok}002", Datum = new DateOnly(rok, 4, 2), Suma = 12.50m, Ucel = "Poštovné", Osoba = "Slovenská pošta" });
+        db.SaveChanges();
+        return j;
+    }
+
     /// <summary>Vymyslený, ale formálne platný slovenský IBAN.</summary>
     static string UkazkovyIban(int i)
     {

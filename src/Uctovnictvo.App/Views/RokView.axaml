@@ -50,11 +50,16 @@
       <TabItem Header="Náklady domu">
         <DockPanel>
           <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,4,0,8" Text="Skutočne zaplatené náklady celého domu za rok podľa faktúr. Tieto sumy sa rozpočítajú na byty pri vyúčtovaní." />
-          <DataGrid ItemsSource="{Binding NakladRiadky}" AutoGenerateColumns="False" HorizontalAlignment="Left" Width="820">
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+            <Button Command="{Binding PrevezmiNakladyZFakturCommand}">Prevziať sumy z prijatých faktúr</Button>
+            <TextBlock Classes="popis" VerticalAlignment="Center" Text="Prijatej faktúre v záložke Faktúry zvoľte „Náklad domu“; započíta sa podľa dátumu dodania." />
+          </StackPanel>
+          <DataGrid ItemsSource="{Binding NakladRiadky}" AutoGenerateColumns="False" HorizontalAlignment="Left" Width="940">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Položka" Binding="{Binding Nazov}" IsReadOnly="True" Width="320" />
               <DataGridTextColumn Header="Rozpočítava sa" Binding="{Binding Kluc}" IsReadOnly="True" Width="300" />
               <DataGridTextColumn Header="Náklad za rok €" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="*" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Z faktúr €" Binding="{Binding ZFaktur, Converter={StaticResource Eur}}" Width="120" IsReadOnly="True" CellStyleClasses="cislo" />
             </DataGrid.Columns>
           </DataGrid>
         </DockPanel>
