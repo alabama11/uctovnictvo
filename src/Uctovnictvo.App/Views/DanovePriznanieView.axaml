@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.DanovePriznanieView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles><Style Selector="Button"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <Button Classes="hlavne" Command="{Binding DanovePriznaniePdfCommand}">Podklad PDF…</Button>
+      <Button Command="{Binding ZauctujDanPoCommand}" IsVisible="{Binding JeSro}">Zaúčtovať daň 591/341</Button>
+    </WrapPanel>
+    <Border DockPanel.Dock="Top" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,0,0,8">
+      <TextBlock Text="{Binding InfoDp}" TextWrapping="Wrap" />
+    </Border>
+    <Border DockPanel.Dock="Left" Width="330" Margin="0,0,12,0" DataContext="{Binding VstupyDp}">
+      <StackPanel Spacing="6">
+        <TextBlock Text="Údaje, ktoré program nevie z evidencie" FontWeight="SemiBold" />
+        <CheckBox IsChecked="{Binding PausalneVydavky}" Content="paušálne výdavky 60 % (max. 20 000 €)"
+                  IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBlock Classes="stitok" Text="Zaplatené poistné SP + ZP (prázdne = z daňovej evidencie)" TextWrapping="Wrap" IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBox Text="{Binding ZaplatenePoistne, Converter={StaticResource Eur}}" Watermark="{Binding PoistneZDennika, Converter={StaticResource Eur}}" IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBlock Classes="stitok" Text="III. pilier – zaplatené príspevky (max. 180 €)" IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBox Text="{Binding Pilier3, Converter={StaticResource Eur}}" IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBlock Classes="stitok" Text="Daňový bonus na deti (suma za rok)" IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBox Text="{Binding DanovyBonus, Converter={StaticResource Eur}}" IsVisible="{Binding $parent[UserControl].DataContext.JeSzco}" />
+        <TextBlock Classes="stitok" Text="Ďalšie pripočítateľné položky" IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
+        <TextBox Text="{Binding DalsiePripocitatelne, Converter={StaticResource Eur}}" IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
+        <TextBlock Classes="stitok" Text="Odpočítateľné položky" IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
+        <TextBox Text="{Binding Odpocitatelne, Converter={StaticResource Eur}}" IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
+        <CheckBox IsChecked="{Binding PrveObdobie}" Content="prvé zdaňovacie obdobie (bez minimálnej dane)" IsVisible="{Binding $parent[UserControl].DataContext.JeSro}" />
+        <TextBlock Classes="stitok" Text="Odpočet daňovej straty z minulých rokov" />
+        <TextBox Text="{Binding OdpocetStraty, Converter={StaticResource Eur}}" />
+        <TextBlock Classes="stitok" Text="Zaplatené preddavky na daň za rok" />
+        <TextBox Text="{Binding ZaplatenePreddavky, Converter={StaticResource Eur}}" />
+        <TextBlock Classes="popis" TextWrapping="Wrap" Margin="0,8,0,0"
+                   Text="Hodnoty prepíšte do eFormulára na financnasprava.sk (DPFOBv25 / DPPOv25) alebo do eDane. Riadky bez čísla sú medzivýpočty." />
+      </StackPanel>
+    </Border>
+    <DataGrid ItemsSource="{Binding RiadkyDp}" AutoGenerateColumns="False" IsReadOnly="True">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Riadok tlačiva" Binding="{Binding Riadok}" Width="140" />
+        <DataGridTextColumn Header="Položka" Binding="{Binding Text}" Width="*" />
+        <DataGridTextColumn Header="Suma" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="120" CellStyleClasses="cislo" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

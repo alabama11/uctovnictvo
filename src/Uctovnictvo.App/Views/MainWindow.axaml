@@ -118,6 +118,9 @@
           <TabItem Header="Účtovníctvo" IsVisible="{Binding JeSro}">
             <v:UctovnictvoView />
           </TabItem>
+          <TabItem Header="Daňové priznanie" IsVisible="{Binding JeFirma}">
+            <v:DanovePriznanieView />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Panel>
