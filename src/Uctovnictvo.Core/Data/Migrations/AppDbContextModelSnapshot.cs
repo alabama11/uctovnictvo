@@ -343,6 +343,59 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.ToTable("Majetok", (string)null);
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.MzdaMesiac", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("DanovyBonus")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("HrubaMzda")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Mesiac")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Nczd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Poznamka")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Preddavok")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Rok")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("SpZamestnanec")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("SpZamestnavatel")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("ZakladDane")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ZamestnanecId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("ZpZamestnanec")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("ZpZamestnavatel")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ZamestnanecId", "Rok", "Mesiac")
+                        .IsUnique();
+
+                    b.ToTable("Mzdy", (string)null);
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.NakladRoka", b =>
                 {
                     b.Property<int>("Id")
@@ -964,6 +1017,59 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.ToTable("Vozidla", (string)null);
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Zamestnanec", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Adresa")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("DanovyBonusMesacne")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("DatumNastupu")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly?>("DatumUkoncenia")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Funkcia")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Iban")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("JednotkaId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Meno")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("MesacnaMzda")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RodneCislo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Vyhlasenie")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ZdravotnaPoistovna")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ZdravotnePostihnuty")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JednotkaId");
+
+                    b.ToTable("Zamestnanci", (string)null);
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyPohyb", b =>
                 {
                     b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
@@ -1067,6 +1173,17 @@ namespace Uctovnictvo.Core.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Jednotka");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.MzdaMesiac", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.Zamestnanec", "Zamestnanec")
+                        .WithMany("Mzdy")
+                        .HasForeignKey("ZamestnanecId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Zamestnanec");
                 });
 
             modelBuilder.Entity("Uctovnictvo.Core.Model.NakladRoka", b =>
@@ -1252,6 +1369,17 @@ namespace Uctovnictvo.Core.Data.Migrations
                     b.Navigation("Jednotka");
                 });
 
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Zamestnanec", b =>
+                {
+                    b.HasOne("Uctovnictvo.Core.Model.UctovnaJednotka", "Jednotka")
+                        .WithMany()
+                        .HasForeignKey("JednotkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Jednotka");
+                });
+
             modelBuilder.Entity("Uctovnictvo.Core.Model.BankovyPohyb", b =>
                 {
                     b.Navigation("Uhrady");
@@ -1300,6 +1428,11 @@ namespace Uctovnictvo.Core.Data.Migrations
             modelBuilder.Entity("Uctovnictvo.Core.Model.Vozidlo", b =>
                 {
                     b.Navigation("Jazdy");
+                });
+
+            modelBuilder.Entity("Uctovnictvo.Core.Model.Zamestnanec", b =>
+                {
+                    b.Navigation("Mzdy");
                 });
 #pragma warning restore 612, 618
         }

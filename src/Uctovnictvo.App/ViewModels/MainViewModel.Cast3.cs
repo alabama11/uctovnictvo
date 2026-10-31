@@ -58,6 +58,7 @@ public partial class MainViewModel
         foreach (var v in db.Vozidla.Where(v => v.JednotkaId == j.Id).Include(v => v.Jazdy).ToList()) Vozidla.Add(v);
         VybraneVozidlo = Vozidla.FirstOrDefault(v => v.Id == vybrane) ?? Vozidla.FirstOrDefault();
         NacitajDennik();
+        NacitajCast6();
         NacitajCast4();
         NacitajCast5();
     }

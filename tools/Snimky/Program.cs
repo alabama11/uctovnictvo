@@ -63,6 +63,13 @@ var uct = w.GetVisualDescendantsOfType<TabControl>().First(t => t != zalozky && 
 string[] uctMena = { "16a-dennik", "16b-hlavna-kniha", "16c-saldokonto", "16d-zavierka", "16e-rozvrh" };
 for (int i = 0; i < uctMena.Length; i++) { uct.SelectedIndex = i; Snimka(uctMena[i]); }
 zalozky.SelectedIndex = Index("Daňové priznanie"); Snimka("17-danove-priznanie");
+vm.Rok = 2026; vm.MesiacMzdy = 3;
+Dispatcher.UIThread.RunJobs();
+zalozky.SelectedIndex = Index("Mzdy");
+vm.SpracujMzdyCommand.Execute(null);
+vm.MesiacMzdy = 1; vm.SpracujMzdyCommand.Execute(null);
+vm.MesiacMzdy = 2; vm.SpracujMzdyCommand.Execute(null);
+Snimka("18-mzdy");
 Console.WriteLine("Hotovo: " + Path.GetFullPath(vystup));
 
 static class Rozsirenia

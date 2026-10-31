@@ -55,6 +55,14 @@ SZČO a s.r.o. Plán fáz: https://claude.ai/artifact/1kTvw5b8YGGokzXtbfffMn
 - parametre pre roky 2025 a 2026 overené na podpora.financnasprava.sk; PDF podklad na prepis do eFormulára FS
 - XML na import do eDane zatiaľ nie je (chýba overená schéma)
 
+## Verzia 0.7 – mzdy
+
+- zamestnanci v pracovnom pomere (pre 1–2 zamestnancov), mesačné spracovanie z dohodnutej mzdy, úprava hrubej mzdy
+- poistné zamestnanca a zamestnávateľa po fondoch (sadzby 2026, strop vymeriavacieho základu 16 764 €), zdravotne postihnutý, preddavok na daň s nezdaniteľnou časťou 497,23 € a daňovým bonusom
+- výplatné pásky a rekapitulácia (Sociálna poisťovňa, zdravotné poisťovne, daňový úrad) v PDF
+- zaúčtovanie 521/331, 331/336, 331/342, 342/331, 524/336; nové kategórie pre výplaty, odvody a preddavky
+- zatiaľ bez dohôd mimo pracovného pomeru, PN, dovoleniek a ročného zúčtovania; mesačné výkazy sa podávajú v službách poisťovní
+
 Údaje sú v `Dokumenty\Uctovnictvo\uctovnictvo.db`.
 
 ## Zostavenie
