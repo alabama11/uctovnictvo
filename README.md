@@ -33,6 +33,13 @@ SZČO a s.r.o. Plán fáz: https://claude.ai/artifact/1kTvw5b8YGGokzXtbfffMn
 - pokladňa: príjmové a výdavkové doklady, pokladničná kniha (PDF, Excel), kontrola záporného zostatku
 - spoločenstvo: prijaté faktúry podľa kategórie nákladov sa dajú prevziať ako skutočné náklady roka
 
+## Verzia 0.4 – daňová evidencia, majetok, kniha jázd
+
+- peňažný denník z banky a pokladne, kategórie príjmov a výdavkov (daňové, nedaňové, neutrálne), automatické zaradenie úhrad faktúr
+- súhrn daňovej evidencie (§ 6 ods. 11 ZDP) s odpismi, cestovnými náhradami, pohľadávkami a záväzkami k 31. 12. – PDF a Excel
+- majetok: odpisové skupiny 0–6, rovnomerné a zrýchlené daňové odpisy podľa postupu Finančnej správy, pomerná časť v roku zaradenia, vyradenie, podiel použitia na podnikanie
+- kniha jázd: vozidlá, jazdy, spiatočná jazda, základná náhrada za km (0,296 € od 1. 6. 2025, 0,313 € od 1. 1. 2026, upraviteľné) a náhrada za PHM; PDF
+
 Údaje sú v `Dokumenty\Uctovnictvo\uctovnictvo.db`.
 
 ## Zostavenie

@@ -52,6 +52,12 @@ public partial class FakturaVm : ObservableObject
         set { if (value is null) return; F.KategoriaNakladov = value; F.KategoriaNakladovId = value.Id; OnPropertyChanged(); }
     }
 
+    public KategoriaPohybu? KategoriaPohybu
+    {
+        get => F.KategoriaPohybu;
+        set { if (value is null) return; F.KategoriaPohybu = value; F.KategoriaPohybuId = value.Id; OnPropertyChanged(); }
+    }
+
     public string Typ => Faktury.NazovTypu(F.Typ);
     public string Popis => $"{F.Cislo}   {F.PartnerNazov}   {PdfVyuctovanie.Eur(F.Zostava)}";
     public bool JeVydana => F.Druh == DruhFaktury.Vydana;
@@ -131,4 +137,87 @@ public partial class DokladVm : ObservableObject
     public decimal? Vydavok => D.Druh == DruhPokladnicnehoDokladu.Vydavok ? D.Suma : null;
     public decimal Zostatok { get => zostatok; set { zostatok = value; OnPropertyChanged(); OnPropertyChanged(nameof(Prijem)); OnPropertyChanged(nameof(Vydavok)); } }
     public bool Zaporny => zostatok < 0;
+}
+
+/// <summary>Riadok peňažného denníka s možnosťou zmeniť kategóriu.</summary>
+public partial class DennikVm : ObservableObject
+{
+    public RiadokDennika R { get; }
+    readonly Action zmena;
+    /// <summary>Zoznam kategórií pre ComboBox v riadku (väzba cez $parent sa v bunke tabuľky vyhodnotí neskoro).</summary>
+    public IReadOnlyList<KategoriaPohybu> Kategorie { get; }
+    public DennikVm(RiadokDennika r, IReadOnlyList<KategoriaPohybu> kategorie, Action zmena) { R = r; Kategorie = kategorie; this.zmena = zmena; }
+
+    public DateOnly Datum => R.Datum;
+    public string Doklad => R.Doklad;
+    public string Popis => R.Popis;
+    public decimal? Prijem => R.Prijem == 0 ? null : R.Prijem;
+    public decimal? Vydavok => R.Vydavok == 0 ? null : R.Vydavok;
+    public bool Nezaradeny => Kategoria is null;
+
+    public KategoriaPohybu? Kategoria
+    {
+        get => R.Polozka switch { BankovyPohyb p => p.Kategoria, PokladnicnyDoklad d => d.Kategoria, _ => null };
+        set
+        {
+            if (value is null) return;
+            switch (R.Polozka)
+            {
+                case BankovyPohyb p: p.Kategoria = value; p.KategoriaId = value.Id; break;
+                case PokladnicnyDoklad d: d.Kategoria = value; d.KategoriaId = value.Id; break;
+            }
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(Nezaradeny));
+            zmena();
+        }
+    }
+}
+
+public partial class MajetokVm : ObservableObject
+{
+    public Majetok M { get; }
+    public MajetokVm(Majetok m) { M = m; }
+
+    public string InventarneCislo { get => M.InventarneCislo; set { M.InventarneCislo = value; OnPropertyChanged(); } }
+    public string Nazov { get => M.Nazov; set { M.Nazov = value; OnPropertyChanged(); } }
+    public DateOnly? DatumZaradenia { get => M.DatumZaradenia; set { if (value is { } d) M.DatumZaradenia = d; Zmena(); } }
+    public decimal VstupnaCena { get => M.VstupnaCena; set { M.VstupnaCena = value; Zmena(); } }
+    public int OdpisovaSkupina { get => M.OdpisovaSkupina; set { M.OdpisovaSkupina = Math.Clamp(value, 0, 6); if (Odpisy.Koeficienty(M.OdpisovaSkupina) is null) M.Metoda = MetodaOdpisovania.Rovnomerna; Zmena(); } }
+    public bool Zrychlene
+    {
+        get => M.Metoda == MetodaOdpisovania.Zrychlena;
+        set { M.Metoda = value && Odpisy.Koeficienty(M.OdpisovaSkupina) is not null ? MetodaOdpisovania.Zrychlena : MetodaOdpisovania.Rovnomerna; Zmena(); }
+    }
+    public decimal PodielPodnikanie { get => M.PodielPodnikanie; set { M.PodielPodnikanie = Math.Clamp(value, 0, 100); Zmena(); } }
+    public DateOnly? DatumVyradenia { get => M.DatumVyradenia; set { M.DatumVyradenia = value; Zmena(); } }
+    public string? Poznamka { get => M.Poznamka; set { M.Poznamka = value; OnPropertyChanged(); } }
+    public string Doba => M.OdpisovaSkupina is >= 0 and <= 6 ? $"{Odpisy.DobaOdpisovania[M.OdpisovaSkupina]} r." : "";
+
+    public int Rok { get; set; }
+    public decimal OdpisRoka => Odpisy.ZaRok(M, Rok)?.UplatnenyOdpis ?? 0;
+    public decimal ZostatkovaCena => Odpisy.ZostatkovaCena(M, Rok);
+    public IReadOnlyList<OdpisRoka> Plan => Odpisy.Plan(M);
+
+    void Zmena() => OnPropertyChanged(string.Empty);
+}
+
+public partial class JazdaVm : ObservableObject
+{
+    public Jazda J { get; }
+    readonly Vozidlo v;
+    readonly Func<IReadOnlyList<SadzbaKm>> sadzby;
+    readonly Action zmena;
+    public JazdaVm(Jazda j, Vozidlo v, Func<IReadOnlyList<SadzbaKm>> sadzby, Action zmena) { J = j; this.v = v; this.sadzby = sadzby; this.zmena = zmena; }
+
+    public DateOnly? Datum { get => J.Datum; set { if (value is { } d) J.Datum = d; Zmena(); } }
+    public string Odkial { get => J.Odkial; set { J.Odkial = value; OnPropertyChanged(); } }
+    public string Kam { get => J.Kam; set { J.Kam = value; OnPropertyChanged(); } }
+    public string? Ucel { get => J.Ucel; set { J.Ucel = value; OnPropertyChanged(); } }
+    public decimal Km { get => J.Km; set { J.Km = value; Zmena(); } }
+    public bool Sukromna { get => J.Sukromna; set { J.Sukromna = value; Zmena(); } }
+    public string? Vodic { get => J.Vodic; set { J.Vodic = value; OnPropertyChanged(); } }
+    public decimal? CenaPaliva { get => J.CenaPaliva; set { J.CenaPaliva = value; Zmena(); } }
+    public decimal Nahrada { get { var n = KnihaJazd.Nahrada(J, v, sadzby()); return n.Zakladna + n.Phm; } }
+
+    void Zmena() { OnPropertyChanged(string.Empty); zmena(); }
 }

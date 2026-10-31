@@ -52,6 +52,10 @@ vm.DruhFaktur = 1; Snimka("9b-prijate"); vm.DruhFaktur = 0;
 zalozky.SelectedIndex = Index("Adresár"); Snimka("10-adresar");
 zalozky.SelectedIndex = Index("Banka"); Snimka("11-banka");
 zalozky.SelectedIndex = Index("Pokladňa"); Snimka("12-pokladna");
+vm.ZaradAutomatickyCommand.Execute(null);
+zalozky.SelectedIndex = Index("Daňová evidencia"); Snimka("13-danova-evidencia");
+zalozky.SelectedIndex = Index("Majetok"); Snimka("14-majetok");
+zalozky.SelectedIndex = Index("Kniha jázd"); Snimka("15-kniha-jazd");
 Console.WriteLine("Hotovo: " + Path.GetFullPath(vystup));
 
 static class Rozsirenia

@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.MajetokView">
+  <DockPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+      <Button Classes="hlavne" Command="{Binding PridajMajetokCommand}">+ Nový majetok</Button>
+      <Button Command="{Binding ZmazMajetokCommand}">Zmazať</Button>
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Top" Classes="popis" TextWrapping="Wrap" Margin="0,0,0,8"
+               Text="Hmotný majetok sa odpisuje, ak vstupná cena presahuje 1 700 € (nehmotný 2 400 €). Skupiny: 0 = 2 roky, 1 = 4, 2 = 6, 3 = 8, 4 = 12, 5 = 20, 6 = 40 rokov. Zrýchlene sa dá odpisovať len 2. a 3. skupina. V roku zaradenia sa uplatní pomerná časť za mesiace od zaradenia; pri vyradení odpis za celé mesiace pred vyradením." />
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,*" Margin="0,8,0,0" Height="210">
+      <StackPanel>
+        <TextBlock Text="Odpisový plán vybraného majetku" FontWeight="SemiBold" Margin="0,0,0,4" />
+        <DataGrid ItemsSource="{Binding OdpisovyPlan}" AutoGenerateColumns="False" IsReadOnly="True" Width="640" Height="180">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Rok" Binding="{Binding Rok}" Width="70" />
+            <DataGridTextColumn Header="Odpis" Binding="{Binding Odpis, Converter={StaticResource Eur}}" Width="100" CellStyleClasses="cislo" />
+            <DataGridTextColumn Header="Uplatnený" Binding="{Binding UplatnenyOdpis, Converter={StaticResource Eur}}" Width="112" CellStyleClasses="cislo" />
+            <DataGridTextColumn Header="Zostatková cena" Binding="{Binding ZostatkovaCena, Converter={StaticResource Eur}}" Width="140" CellStyleClasses="cislo" />
+            <DataGridTextColumn Header="Poznámka" Binding="{Binding Poznamka}" Width="*" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </StackPanel>
+    </Grid>
+    <DataGrid x:Name="Tabulka" ItemsSource="{Binding MajetokZoznam}" SelectedItem="{Binding VybranyMajetok}" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Inv. číslo" Binding="{Binding InventarneCislo}" Width="100" />
+        <DataGridTextColumn Header="Názov" Binding="{Binding Nazov}" Width="*" />
+        <DataGridTextColumn Header="Zaradený" Binding="{Binding DatumZaradenia, Converter={StaticResource Datum}}" Width="96" />
+        <DataGridTextColumn Header="Vst. cena" Binding="{Binding VstupnaCena, Converter={StaticResource Eur}}" Width="104" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Skup." Binding="{Binding OdpisovaSkupina}" Width="70" CellStyleClasses="cislo" />
+        <DataGridCheckBoxColumn Header="Zrýchl." Binding="{Binding Zrychlene}" Width="84" />
+        <DataGridTextColumn Header="% podn." Binding="{Binding PodielPodnikanie, Converter={StaticResource Eur}}" Width="92" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Vyradený" Binding="{Binding DatumVyradenia, Converter={StaticResource Datum}}" Width="96" />
+        <DataGridTextColumn Header="Odpis roka" Binding="{Binding OdpisRoka, Converter={StaticResource Eur}}" Width="112" IsReadOnly="True" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="ZC 31.12." Binding="{Binding ZostatkovaCena, Converter={StaticResource Eur}}" Width="104" IsReadOnly="True" CellStyleClasses="cislo" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

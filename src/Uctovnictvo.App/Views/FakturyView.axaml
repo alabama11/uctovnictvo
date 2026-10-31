@@ -43,7 +43,7 @@
             <TextBox Text="{Binding Cislo}" Width="130" FontWeight="SemiBold" />
             <TextBlock Text="{Binding Stav}" VerticalAlignment="Center" Foreground="#555" />
           </StackPanel>
-          <Grid ColumnDefinitions="92,*,10,100,140" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+          <Grid ColumnDefinitions="92,*,10,100,140" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
             <Grid.Styles>
               <Style Selector="TextBox, ComboBox"><Setter Property="Margin" Value="0,2" /><Setter Property="HorizontalAlignment" Value="Stretch" /></Style>
             </Grid.Styles>
@@ -84,6 +84,11 @@
             <TextBlock Grid.Row="5" Grid.Column="3" Classes="stitok" Text="Náklad domu" IsVisible="{Binding $parent[UserControl].DataContext.JeSpolocenstvo}" />
             <ComboBox Grid.Row="5" Grid.Column="4" ItemsSource="{Binding $parent[UserControl].DataContext.Kategorie}" SelectedItem="{Binding Kategoria}"
                       IsVisible="{Binding $parent[UserControl].DataContext.JeSpolocenstvo}" PlaceholderText="kategória nákladov">
+              <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Row="6" Classes="stitok" Text="Kategória" IsVisible="{Binding $parent[UserControl].DataContext.JeFirma}" />
+            <ComboBox Grid.Row="6" Grid.Column="1" ItemsSource="{Binding $parent[UserControl].DataContext.KategoriePohybov}" SelectedItem="{Binding KategoriaPohybu}"
+                      IsVisible="{Binding $parent[UserControl].DataContext.JeFirma}" PlaceholderText="pre daňovú evidenciu (nepovinné)">
               <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
             </ComboBox>
           </Grid>

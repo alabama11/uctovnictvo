@@ -106,6 +106,15 @@
           <TabItem Header="Pokladňa">
             <v:PokladnaView />
           </TabItem>
+          <TabItem Header="Daňová evidencia" IsVisible="{Binding JeFirma}">
+            <v:DanovaEvidenciaView />
+          </TabItem>
+          <TabItem Header="Majetok" IsVisible="{Binding JeFirma}">
+            <v:MajetokView />
+          </TabItem>
+          <TabItem Header="Kniha jázd" IsVisible="{Binding JeFirma}">
+            <v:KnihaJazdView />
+          </TabItem>
         </TabControl>
       </DockPanel>
     </Panel>

@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.KnihaJazdView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+      <WrapPanel.Styles><Style Selector="Button, ComboBox, TextBlock"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <TextBlock Text="Vozidlo:" VerticalAlignment="Center" />
+      <ComboBox ItemsSource="{Binding Vozidla}" SelectedItem="{Binding VybraneVozidlo}" Width="220" PlaceholderText="pridajte vozidlo">
+        <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Command="{Binding PridajVozidloCommand}">+ Vozidlo</Button>
+      <Button Command="{Binding ZmazVozidloCommand}">Zmazať vozidlo</Button>
+      <Button Command="{Binding SadzbyZaKmCommand}">Sadzby za km…</Button>
+      <Button Command="{Binding KnihaJazdPdfCommand}">Kniha jázd PDF…</Button>
+    </WrapPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8" DataContext="{Binding VybraneVozidlo}"
+               IsVisible="{Binding $parent[UserControl].DataContext.VybraneVozidlo, Converter={x:Static ObjectConverters.IsNotNull}}">
+      <WrapPanel.Styles>
+        <Style Selector="TextBox"><Setter Property="Margin" Value="0,0,14,6" /></Style>
+        <Style Selector="TextBlock"><Setter Property="Margin" Value="0,0,6,6" /><Setter Property="VerticalAlignment" Value="Center" /></Style>
+      </WrapPanel.Styles>
+      <TextBlock Text="Názov" /><TextBox x:Name="Nazov" Width="160" Text="{Binding Nazov}" />
+      <TextBlock Text="EČV" /><TextBox Width="90" Text="{Binding Ecv}" />
+      <TextBlock Text="Spotreba l/100 km" /><TextBox x:Name="Spotreba" Width="60" Text="{Binding Spotreba, Converter={StaticResource Eur}}" />
+      <TextBlock Text="Palivo" /><TextBox Width="80" Text="{Binding Palivo}" />
+      <TextBlock Text="Cena paliva €/l" /><TextBox x:Name="Cena" Width="70" Text="{Binding CenaPaliva, Converter={StaticResource M3}}" />
+      <CheckBox x:Name="Majetok" IsChecked="{Binding VObchodnomMajetku}" Content="v obchodnom majetku" Margin="0,0,0,6" />
+    </WrapPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+      <Button Classes="hlavne" Command="{Binding PridajJazduCommand}">+ Jazda</Button>
+      <Button Command="{Binding SpiatocnaJazdaCommand}">+ Spiatočná</Button>
+      <Button Command="{Binding ZmazJazduCommand}">Zmazať jazdu</Button>
+    </StackPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding SuhrnJazd}" FontWeight="SemiBold" TextWrapping="Wrap" />
+    </Border>
+    <DataGrid x:Name="Tabulka" ItemsSource="{Binding Jazdy}" SelectedItem="{Binding VybranaJazda}" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Dátum" Binding="{Binding Datum, Converter={StaticResource Datum}}" Width="92" />
+        <DataGridTextColumn Header="Odkiaľ" Binding="{Binding Odkial}" Width="130" />
+        <DataGridTextColumn Header="Kam" Binding="{Binding Kam}" Width="130" />
+        <DataGridTextColumn Header="Účel" Binding="{Binding Ucel}" Width="*" />
+        <DataGridTextColumn Header="Km" Binding="{Binding Km, Converter={StaticResource Eur}}" Width="76" CellStyleClasses="cislo" />
+        <DataGridCheckBoxColumn Header="Súkr." Binding="{Binding Sukromna}" Width="64" />
+        <DataGridTextColumn Header="Vodič" Binding="{Binding Vodic}" Width="120" />
+        <DataGridTextColumn Header="€/l" Binding="{Binding CenaPaliva, Converter={StaticResource M3Prazdne}}" Width="76" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Náhrada" Binding="{Binding Nahrada, Converter={StaticResource Eur}}" Width="100" IsReadOnly="True" CellStyleClasses="cislo" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

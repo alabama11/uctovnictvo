@@ -25,6 +25,10 @@ public class AppDbContext : DbContext
     public DbSet<UhradaFaktury> UhradyFaktur => Set<UhradaFaktury>();
     public DbSet<BankovyPohyb> BankovePohyby => Set<BankovyPohyb>();
     public DbSet<PokladnicnyDoklad> PokladnicneDoklady => Set<PokladnicnyDoklad>();
+    public DbSet<KategoriaPohybu> KategoriePohybov => Set<KategoriaPohybu>();
+    public DbSet<Majetok> Majetok => Set<Majetok>();
+    public DbSet<Vozidlo> Vozidla => Set<Vozidlo>();
+    public DbSet<Jazda> Jazdy => Set<Jazda>();
 
     public static AppDbContext Open(string dbPath)
     {
@@ -110,7 +114,14 @@ public class AppDbContext : DbContext
         {
             e.ToTable("PokladnicneDoklady");
             e.HasIndex(p => new { p.JednotkaId, p.Cislo }).IsUnique();
+            e.HasOne(p => p.Kategoria).WithMany().HasForeignKey(p => p.KategoriaId).OnDelete(DeleteBehavior.SetNull);
         });
+        b.Entity<BankovyPohyb>().HasOne(p => p.Kategoria).WithMany().HasForeignKey(p => p.KategoriaId).OnDelete(DeleteBehavior.SetNull);
+        b.Entity<Faktura>().HasOne(p => p.KategoriaPohybu).WithMany().HasForeignKey(p => p.KategoriaPohybuId).OnDelete(DeleteBehavior.SetNull);
+        b.Entity<KategoriaPohybu>().ToTable("KategoriePohybov");
+        b.Entity<Majetok>().ToTable("Majetok");
+        b.Entity<Vozidlo>().ToTable("Vozidla");
+        b.Entity<Jazda>(e => { e.ToTable("Jazdy"); e.HasIndex(j => new { j.VozidloId, j.Datum }); });
     }
 }
 

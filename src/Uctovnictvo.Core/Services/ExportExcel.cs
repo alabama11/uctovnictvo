@@ -225,6 +225,36 @@ public static class ExportExcel
         wb.SaveAs(path);
     }
 
+    public static void DanovaEvidencia(UctovnaJednotka j, SuhrnDanovejEvidencie s, IReadOnlyList<RiadokDennika> dennik, IReadOnlyList<Majetok> majetok, string path)
+    {
+        using var wb = new XLWorkbook();
+        Harok(wb, "Súhrn", $"{j.Nazov} – daňová evidencia {s.Rok}", new[] { "Položka", "Suma" }, new List<object?[]>
+        {
+            new object?[] { "Daňové príjmy", s.DanovePrijmy },
+            new object?[] { "Daňové výdavky – zaplatené", s.DanoveVydavkyPeniazne },
+            new object?[] { "Daňové odpisy", s.Odpisy },
+            new object?[] { "Cestovné náhrady", s.CestovneNahrady },
+            new object?[] { "Daňové výdavky spolu", s.DanoveVydavky },
+            new object?[] { "Rozdiel príjmov a výdavkov", s.Vysledok },
+            new object?[] { "Nedaňové výdavky", s.NedanoveVydavky },
+            new object?[] { "Nezaradené pohyby", s.Nezaradene },
+        }.Concat(s.Kategorie.Select(k => new object?[] { "  " + k.Nazov, k.Suma })));
+        Harok(wb, "Peňažný denník", $"Peňažný denník {s.Rok}", new[] { "Dátum", "Doklad", "Zdroj", "Popis", "Kategória", "Príjem", "Výdavok" },
+            dennik.Select(r => new object?[] { r.Datum, r.Doklad, r.Zdroj, r.Popis, r.Kategoria?.Nazov ?? "NEZARADENÉ", r.Prijem == 0 ? null : r.Prijem, r.Vydavok == 0 ? null : r.Vydavok }));
+        Harok(wb, "Majetok", $"Majetok a odpisy {s.Rok}", new[] { "Inv. č.", "Názov", "Zaradený", "Skupina", "Metóda", "Vstupná cena", "Odpis", "Uplatnený odpis", "ZC 31.12.", "Vyradený" },
+            majetok.OrderBy(m => m.InventarneCislo).Select(m =>
+            {
+                var o = Odpisy.ZaRok(m, s.Rok);
+                return new object?[] { m.InventarneCislo, m.Nazov, m.DatumZaradenia, m.OdpisovaSkupina, m.Metoda == MetodaOdpisovania.Zrychlena ? "zrýchlená" : "rovnomerná",
+                    m.VstupnaCena, o?.Odpis ?? 0m, o?.UplatnenyOdpis ?? 0m, Odpisy.ZostatkovaCena(m, s.Rok), m.DatumVyradenia };
+            }));
+        var koniec = new DateOnly(s.Rok, 12, 31);
+        Harok(wb, "Pohľadávky a záväzky", $"Pohľadávky a záväzky k 31. 12. {s.Rok}", new[] { "Druh", "Doklad", "Partner", "Splatná", "Zostáva" },
+            s.Pohladavky.Select(f => new object?[] { "pohľadávka", f.Cislo, f.PartnerNazov, f.DatumSplatnosti, Services.DanovaEvidencia.ZostatokK(f, koniec) })
+                .Concat(s.Zavazky.Select(f => new object?[] { "záväzok", f.CisloDodavatela ?? f.Cislo, f.PartnerNazov, f.DatumSplatnosti, Services.DanovaEvidencia.ZostatokK(f, koniec) })));
+        wb.SaveAs(path);
+    }
+
     public static string NazovUcelu(UcelUhrady u) => u switch
     {
         UcelUhrady.Zalohy => "zálohy",

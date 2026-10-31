@@ -325,6 +325,9 @@ public class Faktura
     public int? KategoriaNakladovId { get; set; }
     public KategoriaNakladov? KategoriaNakladov { get; set; }
     public DateOnly? DatumUpomienky { get; set; }
+    /// <summary>Kategória daňovej evidencie, ktorú dostane úhrada faktúry.</summary>
+    public int? KategoriaPohybuId { get; set; }
+    public KategoriaPohybu? KategoriaPohybu { get; set; }
 
     public List<PolozkaFaktury> Polozky { get; set; } = new();
     public List<UhradaFaktury> Uhrady { get; set; } = new();
@@ -377,6 +380,8 @@ public class BankovyPohyb
     public string? Popis { get; set; }
     /// <summary>Jednoznačný identifikátor z výpisu – zabráni dvojitému importu.</summary>
     public string? Referencia { get; set; }
+    public int? KategoriaId { get; set; }
+    public KategoriaPohybu? Kategoria { get; set; }
 
     public List<UhradaFaktury> Uhrady { get; set; } = new();
 }
@@ -401,6 +406,95 @@ public class PokladnicnyDoklad
     public string Ucel { get; set; } = "";
     /// <summary>Od koho prijaté / komu vyplatené.</summary>
     public string? Osoba { get; set; }
+    public int? KategoriaId { get; set; }
+    public KategoriaPohybu? Kategoria { get; set; }
 
     public List<UhradaFaktury> Uhrady { get; set; } = new();
+}
+
+public enum DruhKategorie
+{
+    Prijem = 0,
+    Vydavok = 1,
+    /// <summary>Nie je príjmom ani výdavkom: prevod medzi bankou a pokladňou, vklad alebo výber podnikateľa, úver.</summary>
+    Neutralny = 2,
+}
+
+/// <summary>Kategória peňažného denníka / daňovej evidencie (napr. „Služby“, „Poistné SP a ZP“).</summary>
+public class KategoriaPohybu
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public string Nazov { get; set; } = "";
+    public DruhKategorie Druh { get; set; }
+    /// <summary>Daňový príjem / daňovo uznaný výdavok.</summary>
+    public bool Danovy { get; set; } = true;
+    /// <summary>Strojový kód pre automatické priradenie a neskôr pre daňové priznanie (napr. „trzby“, „poistne“).</summary>
+    public string? Kod { get; set; }
+    public int Poradie { get; set; }
+
+    public override string ToString() => Nazov;
+}
+
+public enum MetodaOdpisovania
+{
+    Rovnomerna = 0,
+    Zrychlena = 1,
+}
+
+/// <summary>Dlhodobý hmotný alebo nehmotný majetok s daňovými odpismi.</summary>
+public class Majetok
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public string InventarneCislo { get; set; } = "";
+    public string Nazov { get; set; } = "";
+    public DateOnly? DatumObstarania { get; set; }
+    public DateOnly DatumZaradenia { get; set; }
+    public decimal VstupnaCena { get; set; }
+    public int OdpisovaSkupina { get; set; } = 1;
+    public MetodaOdpisovania Metoda { get; set; }
+    /// <summary>Podiel použitia na podnikanie v % (napr. auto používané aj súkromne).</summary>
+    public decimal PodielPodnikanie { get; set; } = 100;
+    public DateOnly? DatumVyradenia { get; set; }
+    public string? SposobVyradenia { get; set; }
+    public string? Poznamka { get; set; }
+}
+
+/// <summary>Vozidlo pre knihu jázd.</summary>
+public class Vozidlo
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public string Nazov { get; set; } = "";
+    public string? Ecv { get; set; }
+    /// <summary>Kombinovaná spotreba podľa technického preukazu (l/100 km).</summary>
+    public decimal Spotreba { get; set; }
+    public string? Palivo { get; set; }
+    /// <summary>Vozidlo je v obchodnom majetku – výdavky sa uplatňujú skutočné, náhrady sa nepočítajú.</summary>
+    public bool VObchodnomMajetku { get; set; }
+    /// <summary>Cena paliva za liter použitá pre náhradu (ak nie je zadaná pri jazde).</summary>
+    public decimal CenaPaliva { get; set; }
+    public decimal StavTachometraZaciatok { get; set; }
+
+    public List<Jazda> Jazdy { get; set; } = new();
+}
+
+public class Jazda
+{
+    public int Id { get; set; }
+    public int VozidloId { get; set; }
+    public Vozidlo? Vozidlo { get; set; }
+    public DateOnly Datum { get; set; }
+    public string Odkial { get; set; } = "";
+    public string Kam { get; set; } = "";
+    public string? Ucel { get; set; }
+    public decimal Km { get; set; }
+    public bool Sukromna { get; set; }
+    public string? Vodic { get; set; }
+    /// <summary>Cena paliva pre túto jazdu (napr. podľa bločku); ak chýba, použije sa cena z vozidla.</summary>
+    public decimal? CenaPaliva { get; set; }
 }
