@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.PokladnaView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles><Style Selector="Button, TextBox, TextBlock"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <Button Classes="hlavne" Command="{Binding PridajPrijemCommand}">+ Príjem (PPD)</Button>
+      <Button Classes="hlavne" Command="{Binding PridajVydavokCommand}">+ Výdavok (VPD)</Button>
+      <Button Command="{Binding ZmazDokladCommand}">Zmazať</Button>
+      <Button Command="{Binding DokladPdfCommand}">Doklad PDF…</Button>
+      <Button Command="{Binding PokladnicnaKnihaPdfCommand}">Pokladničná kniha PDF…</Button>
+      <Button Command="{Binding PokladnicnaKnihaExcelCommand}">Excel…</Button>
+      <TextBlock Text="Počiatočný stav pokladne:" VerticalAlignment="Center" Margin="16,0,8,6" />
+      <TextBox Width="100" Text="{Binding PokladnaPociatocnyStav, Converter={StaticResource Eur}}" />
+    </WrapPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding StavPokladne}" FontWeight="SemiBold" TextWrapping="Wrap" />
+    </Border>
+    <DataGrid x:Name="Tabulka" ItemsSource="{Binding Doklady}" SelectedItem="{Binding VybranyDoklad}" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Doklad" Binding="{Binding Cislo}" Width="124" />
+        <DataGridTextColumn Header="Dátum" Binding="{Binding Datum, Converter={StaticResource Datum}}" Width="96" />
+        <DataGridTextColumn Header="Účel" Binding="{Binding Ucel}" Width="*" />
+        <DataGridTextColumn Header="Od koho / komu" Binding="{Binding Osoba}" Width="190" />
+        <DataGridTextColumn Header="Suma" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="96" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Príjem" Binding="{Binding Prijem, Converter={StaticResource Eur}}" Width="90" IsReadOnly="True" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Výdavok" Binding="{Binding Vydavok, Converter={StaticResource Eur}}" Width="100" IsReadOnly="True" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Zostatok" Binding="{Binding Zostatok, Converter={StaticResource Eur}}" Width="100" IsReadOnly="True" CellStyleClasses="cislo" FontWeight="SemiBold" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

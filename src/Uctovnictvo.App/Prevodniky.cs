@@ -62,6 +62,12 @@ public class EnumTextPrevodnik : IValueConverter
         TypPohybuFondu.PociatocnyStav => "počiatočný stav",
         TypPohybuFondu.Cerpanie => "čerpanie (výdavok)",
         TypPohybuFondu.InyPrijem => "iný príjem",
+        DruhFaktury.Vydana => "vydaná",
+        DruhFaktury.Prijata => "prijatá",
+        TypFaktury t => Core.Services.Faktury.NazovTypu(t),
+        FormaUhrady f => Core.Services.Faktury.NazovFormy(f),
+        DruhPokladnicnehoDokladu.Prijem => "príjem (PPD)",
+        DruhPokladnicnehoDokladu.Vydavok => "výdavok (VPD)",
         null => "",
         _ => value.ToString() ?? "",
     };
@@ -77,6 +83,8 @@ public static class Zoznamy
     public static KlucRozpoctu[] Kluce { get; } = Enum.GetValues<KlucRozpoctu>();
     public static UcelUhrady[] Ucely { get; } = Enum.GetValues<UcelUhrady>();
     public static TypPohybuFondu[] TypyPohybuFondu { get; } = Enum.GetValues<TypPohybuFondu>();
+    public static FormaUhrady[] FormyUhrady { get; } = Enum.GetValues<FormaUhrady>();
+    public static TypFaktury[] TypyFaktur { get; } = Enum.GetValues<TypFaktury>();
 }
 
 public class IbanKontrolaPrevodnik : IValueConverter

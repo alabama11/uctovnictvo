@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.BankaView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles><Style Selector="Button, ComboBox"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <Button Classes="hlavne" Command="{Binding ImportVypisuCommand}">Načítať výpis (XML)…</Button>
+      <Button Command="{Binding SparujBankuCommand}">Spárovať automaticky</Button>
+      <Button Command="{Binding PridajPohybCommand}">+ Pohyb ručne</Button>
+      <Button Command="{Binding ZmazPohybCommand}">Zmazať</Button>
+      <Button Command="{Binding ExportBankyCommand}">Excel…</Button>
+    </WrapPanel>
+    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+      <TextBlock Text="Vybraný pohyb priradiť k faktúre:" VerticalAlignment="Center" />
+      <ComboBox ItemsSource="{Binding OtvoreneFaktury}" SelectedItem="{Binding FakturaNaPriradenie}" Width="420" PlaceholderText="neuhradené faktúry">
+        <ComboBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding Popis}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Command="{Binding PriradPohybCommand}">Priradiť</Button>
+      <Button Command="{Binding ZrusParovaniePohybuCommand}">Zrušiť priradenie</Button>
+    </StackPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding SumaBanky}" FontWeight="SemiBold" />
+    </Border>
+    <DataGrid ItemsSource="{Binding BankovePohyby}" SelectedItem="{Binding VybranyBankovyPohyb}" AutoGenerateColumns="False">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Dátum" Binding="{Binding Datum, Converter={StaticResource Datum}}" Width="96" />
+        <DataGridTextColumn Header="Suma" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="100" CellStyleClasses="cislo" />
+        <DataGridTextColumn Header="Protistrana" Binding="{Binding ProtiNazov}" Width="180" />
+        <DataGridTextColumn Header="Protiúčet" Binding="{Binding ProtiIban}" Width="200" />
+        <DataGridTextColumn Header="VS" Binding="{Binding VariabilnySymbol}" Width="100" />
+        <DataGridTextColumn Header="Popis" Binding="{Binding Popis}" Width="*" />
+        <DataGridTextColumn Header="Faktúra" Binding="{Binding Faktury}" Width="110" IsReadOnly="True" />
+      </DataGrid.Columns>
+    </DataGrid>
+  </DockPanel>
+</UserControl>

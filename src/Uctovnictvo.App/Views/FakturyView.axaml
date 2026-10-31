@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:k="using:Uctovnictvo.App"
+             x:Class="Uctovnictvo.App.Views.FakturyView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles>
+        <Style Selector="Button, ComboBox, CheckBox"><Setter Property="Margin" Value="0,0,8,6" /></Style>
+      </WrapPanel.Styles>
+      <ComboBox SelectedIndex="{Binding DruhFaktur}" Width="160">
+        <ComboBoxItem>Vydané faktúry</ComboBoxItem>
+        <ComboBoxItem>Prijaté faktúry</ComboBoxItem>
+      </ComboBox>
+      <CheckBox IsChecked="{Binding LenNeuhradene}" Content="len neuhradené (všetky roky)" />
+      <Button Classes="hlavne" Command="{Binding NovaFakturaCommand}">+ Nová faktúra</Button>
+      <Button Command="{Binding NovaZalohovaCommand}" IsVisible="{Binding ZobrazujeVydane}">+ Zálohová</Button>
+      <Button Command="{Binding ImportEFakturyCommand}" IsVisible="{Binding !ZobrazujeVydane}">Načítať e-faktúru (XML)…</Button>
+      <Button Command="{Binding KopiaFakturyCommand}">Kópia</Button>
+      <Button Command="{Binding DobropisFakturyCommand}">Dobropis</Button>
+      <Button Command="{Binding VyuctovanieZalohyCommand}" IsVisible="{Binding ZobrazujeVydane}">Vyúčtovať zálohu</Button>
+      <Button Command="{Binding ZmazFakturuCommand}">Zmazať</Button>
+      <Button Command="{Binding ExportFakturCommand}">Kniha faktúr (Excel)…</Button>
+    </WrapPanel>
+    <Border DockPanel.Dock="Bottom" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+      <TextBlock Text="{Binding SumaFaktur}" FontWeight="SemiBold" />
+    </Border>
+    <Grid ColumnDefinitions="9*,10,11*">
+      <DataGrid x:Name="Zoznam" ItemsSource="{Binding Faktury}" SelectedItem="{Binding VybranaFaktura}" AutoGenerateColumns="False" IsReadOnly="True">
+        <DataGrid.Columns>
+          <DataGridTextColumn Header="Číslo" Binding="{Binding Cislo}" Width="104" />
+          <DataGridTextColumn Header="Partner" Binding="{Binding PartnerNazov}" Width="*" MinWidth="110" />
+          <DataGridTextColumn Header="Suma" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="84" CellStyleClasses="cislo" />
+          <DataGridTextColumn Header="Stav" Binding="{Binding Stav}" Width="140" />
+        </DataGrid.Columns>
+      </DataGrid>
+      <ScrollViewer Grid.Column="2" DataContext="{Binding VybranaFaktura}" IsVisible="{Binding $parent[UserControl].DataContext.VybranaFaktura, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <StackPanel Spacing="6" Margin="0,0,10,0">
+          <StackPanel.Styles>
+            <Style Selector="TextBlock.stitok"><Setter Property="VerticalAlignment" Value="Center" /></Style>
+          </StackPanel.Styles>
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <TextBlock Text="{Binding Typ}" FontSize="17" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBox Text="{Binding Cislo}" Width="130" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding Stav}" VerticalAlignment="Center" Foreground="#555" />
+          </StackPanel>
+          <Grid ColumnDefinitions="92,*,10,100,140" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+            <Grid.Styles>
+              <Style Selector="TextBox, ComboBox"><Setter Property="Margin" Value="0,2" /><Setter Property="HorizontalAlignment" Value="Stretch" /></Style>
+            </Grid.Styles>
+            <TextBlock Classes="stitok" Text="Z adresára" />
+            <ComboBox Grid.Column="1" ItemsSource="{Binding $parent[UserControl].DataContext.Partneri}" SelectedItem="{Binding Partner}" PlaceholderText="vyberte partnera">
+              <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
+            </ComboBox>
+            <TextBlock Grid.Column="3" Classes="stitok" Text="Vystavená" />
+            <TextBox Grid.Column="4" Text="{Binding DatumVystavenia, Converter={StaticResource Datum}}" />
+
+            <TextBlock Grid.Row="1" Classes="stitok" Text="Názov" />
+            <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding PartnerNazov}" />
+            <TextBlock Grid.Row="1" Grid.Column="3" Classes="stitok" Text="Dodanie" />
+            <TextBox Grid.Row="1" Grid.Column="4" Text="{Binding DatumDodania, Converter={StaticResource Datum}}" />
+
+            <TextBlock Grid.Row="2" Classes="stitok" Text="Adresa" />
+            <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding PartnerAdresa}" />
+            <TextBlock Grid.Row="2" Grid.Column="3" Classes="stitok" Text="Splatnosť" />
+            <TextBox Grid.Row="2" Grid.Column="4" Text="{Binding DatumSplatnosti, Converter={StaticResource Datum}}" />
+
+            <TextBlock Grid.Row="3" Classes="stitok" Text="IČO / DIČ" />
+            <Grid Grid.Row="3" Grid.Column="1" ColumnDefinitions="*,6,*">
+              <TextBox Text="{Binding PartnerIco}" Watermark="IČO" />
+              <TextBox Grid.Column="2" Text="{Binding PartnerDic}" Watermark="DIČ" />
+            </Grid>
+            <TextBlock Grid.Row="3" Grid.Column="3" Classes="stitok" Text="Forma úhrady" />
+            <ComboBox Grid.Row="3" Grid.Column="4" ItemsSource="{x:Static k:Zoznamy.FormyUhrady}" SelectedItem="{Binding FormaUhrady}">
+              <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Converter={StaticResource EnumText}}" /></DataTemplate></ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <TextBlock Grid.Row="4" Classes="stitok" Text="Č. dodávateľa" IsVisible="{Binding JePrijata}" />
+            <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding CisloDodavatela}" IsVisible="{Binding JePrijata}" />
+            <TextBlock Grid.Row="4" Grid.Column="3" Classes="stitok" Text="Var. symbol" />
+            <TextBox Grid.Row="4" Grid.Column="4" Text="{Binding VariabilnySymbol}" />
+
+            <TextBlock Grid.Row="5" Classes="stitok" Text="IBAN partnera" IsVisible="{Binding JePrijata}" />
+            <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding PartnerIban}" IsVisible="{Binding JePrijata}" />
+            <TextBlock Grid.Row="5" Grid.Column="3" Classes="stitok" Text="Náklad domu" IsVisible="{Binding $parent[UserControl].DataContext.JeSpolocenstvo}" />
+            <ComboBox Grid.Row="5" Grid.Column="4" ItemsSource="{Binding $parent[UserControl].DataContext.Kategorie}" SelectedItem="{Binding Kategoria}"
+                      IsVisible="{Binding $parent[UserControl].DataContext.JeSpolocenstvo}" PlaceholderText="kategória nákladov">
+              <ComboBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding Nazov}" /></DataTemplate></ComboBox.ItemTemplate>
+            </ComboBox>
+          </Grid>
+          <TextBox Text="{Binding TextNad}" Watermark="Text nad položkami (nepovinný)" AcceptsReturn="True" TextWrapping="Wrap" />
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="Položky" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <Button Command="{Binding $parent[UserControl].DataContext.PridajPolozkuCommand}">+ Položka</Button>
+            <Button Command="{Binding $parent[UserControl].DataContext.ZmazPolozkuCommand}">Zmazať položku</Button>
+          </StackPanel>
+          <DataGrid x:Name="Polozky" ItemsSource="{Binding Polozky}" SelectedItem="{Binding $parent[UserControl].DataContext.VybranaPolozka}"
+                    AutoGenerateColumns="False" MinHeight="120" MaxHeight="260">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Popis" Binding="{Binding Popis}" Width="*" />
+              <DataGridTextColumn Header="Množstvo" Binding="{Binding Mnozstvo, Converter={StaticResource M3}}" Width="90" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="MJ" Binding="{Binding Jednotka}" Width="56" />
+              <DataGridTextColumn Header="Cena/MJ" Binding="{Binding CenaZaJednotku, Converter={StaticResource Eur}}" Width="96" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Spolu" Binding="{Binding Suma, Converter={StaticResource Eur}}" Width="96" IsReadOnly="True" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBox Text="{Binding TextPod}" Watermark="Text pod položkami (nepovinný)" AcceptsReturn="True" TextWrapping="Wrap" />
+          <Border Background="#F1F4F7" CornerRadius="4" Padding="10,6">
+            <StackPanel Spacing="2">
+              <TextBlock FontWeight="SemiBold" FontSize="15" Text="{Binding Suma, Converter={StaticResource Eur}, StringFormat='Spolu: {0} €'}" />
+              <TextBlock Text="{Binding Zostava, Converter={StaticResource Eur}, StringFormat='Zostáva uhradiť: {0} €'}" />
+              <TextBlock Classes="popis" TextWrapping="Wrap" Text="{Binding Uhrady, StringFormat='Úhrady: {0}'}" />
+            </StackPanel>
+          </Border>
+          <WrapPanel>
+            <WrapPanel.Styles><Style Selector="Button"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+            <Button Classes="hlavne" Command="{Binding $parent[UserControl].DataContext.FakturaPdfCommand}" IsVisible="{Binding JeVydana}">PDF…</Button>
+            <Button Command="{Binding $parent[UserControl].DataContext.FakturaEmailCommand}" IsVisible="{Binding JeVydana}">Poslať e-mailom…</Button>
+            <Button Command="{Binding $parent[UserControl].DataContext.UhradaHotovostouCommand}">Uhradiť v hotovosti</Button>
+            <Button Command="{Binding $parent[UserControl].DataContext.ZrusUhradyCommand}">Zrušiť úhrady</Button>
+            <Button Command="{Binding $parent[UserControl].DataContext.UpomienkaFakturyCommand}" IsVisible="{Binding JeVydana}">Upomienka…</Button>
+          </WrapPanel>
+          <TextBlock Classes="popis" TextWrapping="Wrap" IsVisible="{Binding JePrijata}"
+                     Text="Od 1. 1. 2027 musí každá firma vedieť prijímať e-faktúry cez doručovaciu službu (aj neplatiteľ DPH). XML súbor, ktorý vám služba doručí, načítate tlačidlom „Načítať e-faktúru“." />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </DockPanel>
+</UserControl>

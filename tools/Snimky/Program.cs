@@ -43,6 +43,15 @@ Dispatcher.UIThread.RunJobs();
 var vnorene = w.GetVisualDescendantsOfType<TabControl>().First(t => t != zalozky);
 vnorene.SelectedIndex = 1; Snimka("4b-odpocty");
 vnorene.SelectedIndex = 2; Snimka("4c-naklady");
+// firma
+vm.VybranaJednotka = vm.Jednotky.First(j => j.Typ != Uctovnictvo.Core.Model.TypJednotky.Spolocenstvo);
+Dispatcher.UIThread.RunJobs();
+int Index(string hlavicka) => zalozky.Items.Cast<TabItem>().ToList().FindIndex(t => (string?)t.Header == hlavicka);
+zalozky.SelectedIndex = Index("Faktúry"); Snimka("9-faktury");
+vm.DruhFaktur = 1; Snimka("9b-prijate"); vm.DruhFaktur = 0;
+zalozky.SelectedIndex = Index("Adresár"); Snimka("10-adresar");
+zalozky.SelectedIndex = Index("Banka"); Snimka("11-banka");
+zalozky.SelectedIndex = Index("Pokladňa"); Snimka("12-pokladna");
 Console.WriteLine("Hotovo: " + Path.GetFullPath(vystup));
 
 static class Rozsirenia

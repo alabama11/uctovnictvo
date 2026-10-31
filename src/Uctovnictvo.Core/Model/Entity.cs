@@ -51,6 +51,13 @@ public class UctovnaJednotka
     public string? Email { get; set; }
     public string? Telefon { get; set; }
     public string? Poznamka { get; set; }
+    /// <summary>Zápis v registri na obchodných listinách, napr. „Zapísaná v OR Mestského súdu Bratislava III, oddiel Sro, vložka č. 12345/B“.</summary>
+    public string? ZapisVRegistri { get; set; }
+    /// <summary>Formát čísla faktúry: RRRR = rok, RR = rok dvojmiestne, # = poradové číslo (počet # = počet číslic).</summary>
+    public string FormatCislaFaktury { get; set; } = "RRRR####";
+    public int SplatnostDni { get; set; } = 14;
+    /// <summary>Počiatočný stav pokladne (k prvému dokladu).</summary>
+    public decimal PokladnaPociatocnyStav { get; set; }
 
     public List<Priestor> Priestory { get; set; } = new();
     public List<KategoriaNakladov> Kategorie { get; set; } = new();
@@ -236,4 +243,164 @@ public class Nastavenie
     public int Id { get; set; }
     public string Kluc { get; set; } = "";
     public string? Hodnota { get; set; }
+}
+
+/// <summary>Odberateľ alebo dodávateľ z adresára.</summary>
+public class Partner
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public string Nazov { get; set; } = "";
+    public string? Ico { get; set; }
+    public string? Dic { get; set; }
+    public string? IcDph { get; set; }
+    public string? Ulica { get; set; }
+    public string? Obec { get; set; }
+    public string? Psc { get; set; }
+    public string? Stat { get; set; }
+    public string? Email { get; set; }
+    public string? Telefon { get; set; }
+    public string? Iban { get; set; }
+    public string? Poznamka { get; set; }
+
+    public string Adresa => string.Join(", ", new[] { Ulica, string.Join(" ", new[] { Psc, Obec }.Where(x => !string.IsNullOrWhiteSpace(x))), Stat }
+        .Where(x => !string.IsNullOrWhiteSpace(x)));
+}
+
+public enum DruhFaktury
+{
+    Vydana = 0,
+    Prijata = 1,
+}
+
+public enum TypFaktury
+{
+    Faktura = 0,
+    Zalohova = 1,
+    Dobropis = 2,
+}
+
+public enum FormaUhrady
+{
+    Prevod = 0,
+    Hotovost = 1,
+    Karta = 2,
+    Dobierka = 3,
+}
+
+public class Faktura
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public DruhFaktury Druh { get; set; }
+    public TypFaktury Typ { get; set; }
+    /// <summary>Číslo dokladu: pri vydaných z číselného radu, pri prijatých interné poradové číslo.</summary>
+    public string Cislo { get; set; } = "";
+    /// <summary>Číslo faktúry dodávateľa (len prijaté).</summary>
+    public string? CisloDodavatela { get; set; }
+    public string? VariabilnySymbol { get; set; }
+    public string? KonstantnySymbol { get; set; }
+
+    public int? PartnerId { get; set; }
+    public Partner? Partner { get; set; }
+    // Údaje partnera v čase vystavenia (faktúra sa nesmie zmeniť, keď sa zmení adresár).
+    public string PartnerNazov { get; set; } = "";
+    public string? PartnerAdresa { get; set; }
+    public string? PartnerIco { get; set; }
+    public string? PartnerDic { get; set; }
+    public string? PartnerIcDph { get; set; }
+    public string? PartnerIban { get; set; }
+
+    public DateOnly DatumVystavenia { get; set; }
+    public DateOnly? DatumDodania { get; set; }
+    public DateOnly DatumSplatnosti { get; set; }
+    public FormaUhrady FormaUhrady { get; set; }
+    /// <summary>Pri dobropise číslo opravovanej faktúry.</summary>
+    public string? PovodnaFaktura { get; set; }
+    public string? TextNad { get; set; }
+    public string? TextPod { get; set; }
+    /// <summary>Kategória nákladov spoločenstva, do ktorej sa prijatá faktúra započíta.</summary>
+    public int? KategoriaNakladovId { get; set; }
+    public KategoriaNakladov? KategoriaNakladov { get; set; }
+    public DateOnly? DatumUpomienky { get; set; }
+
+    public List<PolozkaFaktury> Polozky { get; set; } = new();
+    public List<UhradaFaktury> Uhrady { get; set; } = new();
+
+    public decimal Suma => Polozky.Sum(p => p.Suma);
+    public decimal Uhradene => Uhrady.Sum(u => u.Suma);
+    public decimal Zostava => Suma - Uhradene;
+    public bool JeUhradena => Suma != 0 && Zostava == 0 || Suma == 0;
+    public bool JePoSplatnosti(DateOnly dnes) => !JeUhradena && dnes > DatumSplatnosti && Zostava > 0;
+}
+
+public class PolozkaFaktury
+{
+    public int Id { get; set; }
+    public int FakturaId { get; set; }
+    public Faktura? Faktura { get; set; }
+    public int Poradie { get; set; }
+    public string Popis { get; set; } = "";
+    public decimal Mnozstvo { get; set; } = 1;
+    public string? Jednotka { get; set; }
+    public decimal CenaZaJednotku { get; set; }
+    public decimal Suma => Math.Round(Mnozstvo * CenaZaJednotku, 2, MidpointRounding.AwayFromZero);
+}
+
+public class UhradaFaktury
+{
+    public int Id { get; set; }
+    public int FakturaId { get; set; }
+    public Faktura? Faktura { get; set; }
+    public DateOnly Datum { get; set; }
+    public decimal Suma { get; set; }
+    public int? BankovyPohybId { get; set; }
+    public BankovyPohyb? BankovyPohyb { get; set; }
+    public int? PokladnicnyDokladId { get; set; }
+    public PokladnicnyDoklad? PokladnicnyDoklad { get; set; }
+    public string? Poznamka { get; set; }
+}
+
+/// <summary>Pohyb na bankovom účte firmy (príjem kladný, výdaj záporný).</summary>
+public class BankovyPohyb
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public DateOnly Datum { get; set; }
+    public decimal Suma { get; set; }
+    public string? ProtiIban { get; set; }
+    public string? ProtiNazov { get; set; }
+    public string? VariabilnySymbol { get; set; }
+    public string? Popis { get; set; }
+    /// <summary>Jednoznačný identifikátor z výpisu – zabráni dvojitému importu.</summary>
+    public string? Referencia { get; set; }
+
+    public List<UhradaFaktury> Uhrady { get; set; } = new();
+}
+
+public enum DruhPokladnicnehoDokladu
+{
+    Prijem = 0,
+    Vydavok = 1,
+}
+
+/// <summary>Príjmový (PPD) alebo výdavkový (VPD) pokladničný doklad.</summary>
+public class PokladnicnyDoklad
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public DruhPokladnicnehoDokladu Druh { get; set; }
+    public string Cislo { get; set; } = "";
+    public DateOnly Datum { get; set; }
+    /// <summary>Kladná suma.</summary>
+    public decimal Suma { get; set; }
+    public string Ucel { get; set; } = "";
+    /// <summary>Od koho prijaté / komu vyplatené.</summary>
+    public string? Osoba { get; set; }
+
+    public List<UhradaFaktury> Uhrady { get; set; } = new();
 }
