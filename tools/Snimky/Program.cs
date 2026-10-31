@@ -30,15 +30,17 @@ void Snimka(string nazov)
 }
 
 var zalozky = w.FindControl<TabControl>("Zalozky")!;
-string[] mena = { "1-udaje", "2-byty", "3-polozky", "4-predpisy", "5-uhrady", "6-konto", "7-vyuctovanie", "8-fond" };
-for (int i = 0; i < mena.Length; i++)
+int Index(string hlavicka) => zalozky.Items.Cast<TabItem>().ToList().FindIndex(t => (string?)t.Header == hlavicka);
+(string Tab, string Subor)[] mena = { ("Údaje", "1-udaje"), ("Byty a vlastníci", "2-byty"), ("Položky nákladov", "3-polozky"), ("Predpisy a odpočty", "4-predpisy"),
+    ("Úhrady", "5-uhrady"), ("Konto a upomienky", "6-konto"), ("Vyúčtovanie", "7-vyuctovanie"), ("Fond opráv", "8-fond") };
+foreach (var (tab, subor) in mena)
 {
-    zalozky.SelectedIndex = i;
-    if (i == 6) vm.VypocitajCommand.Execute(null);
-    Snimka(mena[i]);
+    zalozky.SelectedIndex = Index(tab);
+    if (tab == "Vyúčtovanie") vm.VypocitajCommand.Execute(null);
+    Snimka(subor);
 }
 // vnorené záložky roka
-zalozky.SelectedIndex = 3;
+zalozky.SelectedIndex = Index("Predpisy a odpočty");
 Dispatcher.UIThread.RunJobs();
 var vnorene = w.GetVisualDescendantsOfType<TabControl>().First(t => t != zalozky);
 vnorene.SelectedIndex = 1; Snimka("4b-odpocty");
@@ -46,7 +48,6 @@ vnorene.SelectedIndex = 2; Snimka("4c-naklady");
 // firma
 vm.VybranaJednotka = vm.Jednotky.First(j => j.Typ != Uctovnictvo.Core.Model.TypJednotky.Spolocenstvo);
 Dispatcher.UIThread.RunJobs();
-int Index(string hlavicka) => zalozky.Items.Cast<TabItem>().ToList().FindIndex(t => (string?)t.Header == hlavicka);
 zalozky.SelectedIndex = Index("Faktúry"); Snimka("9-faktury");
 vm.DruhFaktur = 1; Snimka("9b-prijate"); vm.DruhFaktur = 0;
 zalozky.SelectedIndex = Index("Adresár"); Snimka("10-adresar");
@@ -70,6 +71,7 @@ vm.SpracujMzdyCommand.Execute(null);
 vm.MesiacMzdy = 1; vm.SpracujMzdyCommand.Execute(null);
 vm.MesiacMzdy = 2; vm.SpracujMzdyCommand.Execute(null);
 Snimka("18-mzdy");
+zalozky.SelectedIndex = Index("Prehľad"); Snimka("0-prehlad-firmy");
 Console.WriteLine("Hotovo: " + Path.GetFullPath(vystup));
 
 static class Rozsirenia

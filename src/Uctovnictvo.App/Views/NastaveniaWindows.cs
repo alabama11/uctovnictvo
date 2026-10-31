@@ -136,3 +136,75 @@ public class NastaveniaZalohWindow : Window
         };
     }
 }
+
+/// <summary>Zadanie hesla pri spustení programu.</summary>
+public class PrihlasenieWindow : Window
+{
+    public PrihlasenieWindow(Func<string, bool> over, Action ok)
+    {
+        Title = "Účtovníctvo – heslo";
+        Width = 380;
+        SizeToContent = SizeToContent.Height;
+        CanResize = false;
+        WindowStartupLocation = WindowStartupLocation.CenterScreen;
+        var heslo = new TextBox { PasswordChar = '•', Watermark = "heslo" };
+        var chyba = new TextBlock { Foreground = Avalonia.Media.Brushes.Firebrick };
+        var prihlas = new Button { Content = "Otvoriť", IsDefault = true, MinWidth = 90, HorizontalAlignment = HorizontalAlignment.Right };
+        prihlas.Classes.Add("hlavne");
+        prihlas.Click += (_, _) =>
+        {
+            if (over(heslo.Text ?? "")) ok();
+            else { chyba.Text = "Nesprávne heslo."; heslo.Text = ""; heslo.Focus(); }
+        };
+        Content = new StackPanel
+        {
+            Margin = new Thickness(18), Spacing = 10,
+            Children = { new TextBlock { Text = "Zadajte heslo k programu:" }, heslo, chyba, prihlas },
+        };
+        Opened += (_, _) => heslo.Focus();
+    }
+}
+
+/// <summary>Nastavenie alebo zrušenie hesla pri spustení.</summary>
+public class NastavenieHeslaWindow : Window
+{
+    public NastavenieHeslaWindow(MainViewModel vm)
+    {
+        Title = "Heslo pri spustení";
+        Width = 460;
+        SizeToContent = SizeToContent.Height;
+        CanResize = false;
+        WindowStartupLocation = WindowStartupLocation.CenterOwner;
+        var nastavene = vm.HesloNastavene;
+        var stare = new TextBox { PasswordChar = '•', Watermark = "súčasné heslo", IsVisible = nastavene };
+        var nove = new TextBox { PasswordChar = '•', Watermark = "nové heslo (prázdne = bez hesla)" };
+        var znova = new TextBox { PasswordChar = '•', Watermark = "nové heslo znova" };
+        var chyba = new TextBlock { Foreground = Avalonia.Media.Brushes.Firebrick, TextWrapping = Avalonia.Media.TextWrapping.Wrap };
+        var uloz = new Button { Content = "Uložiť", IsDefault = true, MinWidth = 90 };
+        uloz.Classes.Add("hlavne");
+        uloz.Click += (_, _) =>
+        {
+            if (nastavene && !vm.OverHeslo(stare.Text ?? "")) { chyba.Text = "Súčasné heslo nie je správne."; return; }
+            if ((nove.Text ?? "") != (znova.Text ?? "")) { chyba.Text = "Nové heslá sa nezhodujú."; return; }
+            if ((nove.Text ?? "").Length is > 0 and < 6) { chyba.Text = "Heslo musí mať aspoň 6 znakov."; return; }
+            vm.NastavHeslo(nove.Text);
+            Close();
+        };
+        var zrus = new Button { Content = "Zrušiť", IsCancel = true, MinWidth = 90 };
+        zrus.Click += (_, _) => Close();
+        Content = new StackPanel
+        {
+            Margin = new Thickness(18), Spacing = 10,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "Heslo sa bude pýtať pri každom spustení programu. Chráni prístup cez program; súbor s údajmi nešifruje, preto ho držte na počítači s vlastným prihlásením do Windows. Zabudnuté heslo nejde obnoviť – pomôže len obnova zo zálohy uloženej pred jeho nastavením.",
+                    TextWrapping = Avalonia.Media.TextWrapping.Wrap, Foreground = Avalonia.Media.Brushes.DimGray,
+                },
+                stare, nove, znova, chyba,
+                new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, HorizontalAlignment = HorizontalAlignment.Right, Children = { uloz, zrus } },
+            },
+        };
+    }
+}

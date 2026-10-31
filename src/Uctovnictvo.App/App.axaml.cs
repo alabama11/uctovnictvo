@@ -16,8 +16,27 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var cesta = Environment.GetEnvironmentVariable("UCTOVNICTVO_DB") ?? Databaza.PredvolenaCesta;
-            var vm = new MainViewModel(cesta);
-            desktop.MainWindow = new MainWindow { DataContext = vm };
+            Databaza.Priprav(cesta);
+            bool chranene;
+            using (var db = AppDbContext.Open(cesta)) chranene = Core.Services.Heslo.JeNastavene(db);
+            if (!chranene)
+                desktop.MainWindow = new MainWindow { DataContext = new MainViewModel(cesta) };
+            else
+            {
+                PrihlasenieWindow? login = null;
+                login = new PrihlasenieWindow(h =>
+                {
+                    using var db = AppDbContext.Open(cesta);
+                    return Core.Services.Heslo.Over(db, h);
+                }, () =>
+                {
+                    var hlavne = new MainWindow { DataContext = new MainViewModel(cesta) };
+                    desktop.MainWindow = hlavne;
+                    hlavne.Show();
+                    login!.Close();
+                });
+                desktop.MainWindow = login;
+            }
         }
         base.OnFrameworkInitializationCompleted();
     }
