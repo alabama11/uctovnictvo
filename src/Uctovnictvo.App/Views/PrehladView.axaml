@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Uctovnictvo.App.Views.PrehladView">
+  <DockPanel>
+    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <WrapPanel.Styles><Style Selector="Button"><Setter Property="Margin" Value="0,0,8,6" /></Style></WrapPanel.Styles>
+      <Button Command="{Binding ObnovPrehladCommand}">Obnoviť</Button>
+      <Button Command="{Binding ExportPreUctovnikaCommand}">Export pre účtovníka…</Button>
+    </WrapPanel>
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Prehlad}">
+        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <Border Width="320" MinHeight="96" Margin="0,0,12,12" Padding="12,10" CornerRadius="6" BorderThickness="1" BorderBrush="#D5DCE3" Background="#FAFBFC">
+              <StackPanel Spacing="4">
+                <TextBlock Text="{Binding Nazov}" Foreground="#4A5560" />
+                <TextBlock Text="{Binding Hodnota}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Poznamka}" TextWrapping="Wrap" FontSize="12" Foreground="#6A7580" IsVisible="{Binding !Upozornenie}" />
+                <TextBlock Text="{Binding Poznamka, StringFormat='⚠ {0}'}" TextWrapping="Wrap" FontSize="12" Foreground="#A0522D" IsVisible="{Binding Upozornenie}" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

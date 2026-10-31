@@ -63,6 +63,14 @@ SZČO a s.r.o. Plán fáz: https://claude.ai/artifact/1kTvw5b8YGGokzXtbfffMn
 - zaúčtovanie 521/331, 331/336, 331/342, 342/331, 524/336; nové kategórie pre výplaty, odvody a preddavky
 - zatiaľ bez dohôd mimo pracovného pomeru, PN, dovoleniek a ročného zúčtovania; mesačné výkazy sa podávajú v službách poisťovní
 
+## Verzia 0.8 – pohodlie
+
+- záložka Prehľad pre firmy: neuhradené a splatné faktúry, pokladňa, banka, výsledok roka, odhad dane, mzdy, upozornenia
+- heslo pri spustení (Súbor → Heslo pri spustení; ukladá sa len odtlačok PBKDF2, súbor databázy sa nešifruje)
+- export pre účtovníka: jeden ZIP s knihami v Exceli, PDF zostavami, vydanými faktúrami a zálohou databázy
+- kontrola aktualizácií podľa posledného vydania na GitHube (Pomocník)
+- výber roka aj pri firmách
+
 Údaje sú v `Dokumenty\Uctovnictvo\uctovnictvo.db`.
 
 ## Zostavenie

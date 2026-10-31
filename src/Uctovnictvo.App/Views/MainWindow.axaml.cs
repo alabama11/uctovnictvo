@@ -19,7 +19,9 @@ public partial class MainWindow : Window, IDialogy
         Closing += (_, _) => (DataContext as MainViewModel)?.Koniec();
         Zalozky.SelectionChanged += (_, e) =>
         {
-            if (e.Source == Zalozky) (DataContext as MainViewModel)?.Uloz();
+            if (e.Source != Zalozky) return;
+            (DataContext as MainViewModel)?.Uloz();
+            if ((Zalozky.SelectedItem as TabItem)?.Header as string == "Prehľad") (DataContext as MainViewModel)?.ObnovPrehlad();
         };
     }
 
@@ -38,7 +40,7 @@ public partial class MainWindow : Window, IDialogy
     void OProgramme(object? sender, RoutedEventArgs e)
     {
         var verzia = typeof(MainWindow).Assembly.GetName().Version;
-        _ = Sprava("O programe", $"Účtovníctvo {verzia?.ToString(3)}\n\nEvidencia spoločenstiev vlastníkov bytov a nebytových priestorov, ročné vyúčtovanie, úhrady a zálohy.\n\nÚdaje: {Vm?.CestaDb}");
+        _ = Sprava("O programe", $"Účtovníctvo {verzia?.ToString(3)}\n\nSpoločenstvá vlastníkov (vyúčtovanie, úhrady, fond opráv), SZČO a s.r.o. bez DPH (faktúry, banka, pokladňa, daňová evidencia, podvojné účtovníctvo, majetok, kniha jázd, mzdy, podklady k daňovým priznaniam).\n\nÚdaje: {Vm?.CestaDb}");
     }
 
     // ---------- IDialogy ----------
@@ -81,6 +83,12 @@ public partial class MainWindow : Window, IDialogy
     {
         if (Vm is null) return;
         await new NastaveniaEmailuWindow(Vm).ShowDialog(this);
+    }
+
+    async void NastavenieHesla(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+        await new NastavenieHeslaWindow(Vm).ShowDialog(this);
     }
 
     async void NastaveniaZaloh(object? sender, RoutedEventArgs e)
