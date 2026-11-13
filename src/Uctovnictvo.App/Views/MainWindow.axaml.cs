@@ -64,7 +64,7 @@ public partial class MainWindow : Window, IDialogy
         {
             Title = titulok,
             AllowMultiple = false,
-            FileTypeFilter = new[] { new FilePickerFileType(popisTypu) { Patterns = new[] { "*." + pripona } }, FilePickerFileTypes.All },
+            FileTypeFilter = new[] { new FilePickerFileType(popisTypu) { Patterns = pripona.Split(';').Select(p => "*." + p).ToArray() }, FilePickerFileTypes.All },
         });
         return f.Count > 0 ? f[0].TryGetLocalPath() : null;
     }

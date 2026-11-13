@@ -36,7 +36,7 @@ public static class PdfVyuctovanie
                 doc.Page(page =>
                 {
                     page.Size(PageSizes.A4);
-                    page.Margin(28);
+                    page.Margin(24);
                     page.DefaultTextStyle(t => t.FontSize(8.5f).FontFamily("Arial", "Lato"));
                     page.Content().Element(c => List(c, jednotka, b, n));
                 });
@@ -48,11 +48,14 @@ public static class PdfVyuctovanie
         var adresa = string.Join(", ", new[] { j.Ulica, j.Obec }.Where(s => !string.IsNullOrWhiteSpace(s)));
         container.Column(col =>
         {
-            col.Spacing(8);
+            col.Spacing(b.Voda?.PodlaTlaciva == true ? 5 : 8);
             col.Item().AlignCenter().Text($"{j.Nazov}{(adresa.Length > 0 ? ", " + adresa : "")}").Bold().FontSize(12);
             col.Item().AlignCenter().Text($"Ročné vyúčtovanie platieb za rok {b.Rok} – {(p.Typ == TypPriestoru.Byt ? "byt" : "nebytový priestor")} č. {p.Cislo}").Bold().FontSize(11);
             if (b.JeCastRoka)
-                col.Item().AlignCenter().Text($"za obdobie vlastníctva {Datum(b.ObdobieOd)} – {Datum(b.ObdobieDo)} (náklady a zálohy pomerne podľa dní)").FontSize(8.5f).Italic();
+            {
+                var k = b.ObdobieDo is { } d && d < new DateOnly(b.Rok, 12, 31) ? $"vyúčtovanie k {Datum(d.AddDays(1))}, " : "";
+                col.Item().AlignCenter().Text($"{k}obdobie vlastníctva {Datum(b.ObdobieOd)} – {Datum(b.ObdobieDo)}; skutočné náklady a zálohy prepočítané podľa mesiacov užívania ({b.MesiaceUzivania}/12)").FontSize(8.5f).Italic();
+            }
 
             // údaje o byte
             col.Item().Table(t =>
@@ -162,7 +165,8 @@ public static class PdfVyuctovanie
                     {
                         c.Spacing(2);
                         c.Item().Text("Informácia o spotrebe vody").Bold();
-                        if (!string.IsNullOrWhiteSpace(v.CisloVodomeru)) Riadok(c, "číslo vodomeru", v.CisloVodomeru);
+                        if (!string.IsNullOrWhiteSpace(v.CisloVodomeru)) Riadok(c, string.IsNullOrWhiteSpace(v.CisloVodomeru2) ? "číslo vodomeru" : "číslo vodomeru 1", v.CisloVodomeru);
+                        if (!string.IsNullOrWhiteSpace(v.CisloVodomeru2)) Riadok(c, "číslo vodomeru 2 (výmena)", v.CisloVodomeru2);
                         c.Item().PaddingTop(4).Text("prehľad spotreby vody za roky:").FontColor(Colors.Blue.Darken2);
                         foreach (var (rok, sp) in v.Historia)
                             Riadok(c, $"rok {rok}", M3(sp));
@@ -171,13 +175,31 @@ public static class PdfVyuctovanie
                     row.RelativeItem(1.4f).Column(c =>
                     {
                         c.Spacing(2);
-                        Riadok(c, $"stav vodomera k {Datum(v.DatumZaciatok)}", v.StavZaciatok is { } z ? M3(z) : "–");
-                        Riadok(c, $"stav vodomera k {Datum(v.DatumKoniec)}", v.StavKoniec is { } k ? M3(k) : "–");
-                        Riadok(c, "spotreba vody za rok spolu", M3(v.Spotreba), true);
-                        Riadok(c, $"cena za 1 m³ vodné a stočné v roku {b.Rok}", Eur(v.CenaZaM3) + "/m³");
-                        Riadok(c, "cena za vodné a stočné spolu za rok", Eur(v.Naklad));
+                        if (v.PodlaTlaciva)
+                        {
+                            string Stav(decimal? x) => x is { } y ? y.ToString("N3", Sk) : "–";
+                            Riadok(c, $"stav {Datum(v.DatumZaciatok)} → {Datum(v.DatumKoniec)}", $"{Stav(v.StavZaciatok)} → {Stav(v.StavKoniec)} m³");
+                            Riadok(c, $"spotreba {M3(v.Spotreba1)} × 1. cena {Eur(v.Cena1)}", Eur(v.Naklad1));
+                            if (v.Stav3 is not null || v.Stav4 is not null || v.Spotreba2 != 0)
+                            {
+                                var vym = !string.IsNullOrWhiteSpace(v.CisloVodomeru2) ? $" (vodomer {v.CisloVodomeru2})" : "";
+                                Riadok(c, $"stav {Datum(v.Datum3)} → {Datum(v.Datum4)}{vym}", $"{Stav(v.Stav3)} → {Stav(v.Stav4)} m³");
+                                Riadok(c, $"spotreba {M3(v.Spotreba2)} × 2. cena {Eur(v.Cena2)}", Eur(v.Naklad2));
+                            }
+                            Riadok(c, "spotreba vody za rok spolu", M3(v.Spotreba), true);
+                            Riadok(c, $"cena za vodné a stočné v roku {b.Rok}",
+                                v.Cena2 > 0 && v.Cena2 != v.Cena1 ? $"{Eur(v.Cena1)} / {Eur(v.Cena2)} za m³" : $"{Eur(v.Cena1)} za m³");
+                        }
+                        else
+                        {
+                            Riadok(c, $"stav vodomera k {Datum(v.DatumZaciatok)}", v.StavZaciatok is { } z ? M3(z) : "–");
+                            Riadok(c, $"stav vodomera k {Datum(v.DatumKoniec)}", v.StavKoniec is { } k ? M3(k) : "–");
+                            Riadok(c, "spotreba vody za rok spolu", M3(v.Spotreba), true);
+                            Riadok(c, $"cena za vodné a stočné v roku {b.Rok}", Eur(v.CenaZaM3) + " za m³");
+                        }
+                        Riadok(c, "cena za vodné a stočné spolu za rok", Eur(v.Naklad), true);
                         Riadok(c, "zálohová platba za vodu v roku", Eur(v.Zaloha));
-                        Riadok(c, "preplatok (+) / nedoplatok (−) za vodu", Eur(v.Rozdiel), true);
+                        Riadok(c, "− nedoplatok / + preplatok za vodu", Eur(v.Rozdiel), true);
                     });
                 });
             }
@@ -204,15 +226,15 @@ public static class PdfVyuctovanie
                 {
                     row.RelativeItem().AlignMiddle().Text(t =>
                     {
-                        t.Span($"Sumu uhraďte do {n.SplatnostDni} dní odo dňa doručenia tohto vyúčtovania na účet ");
-                        t.Span(Iban.Formatuj(j.Iban)).Bold();
-                        t.Span($", VS = {p.VariabilnySymbol ?? p.Cislo}.");
+                        t.Span($"Sumu uhraďte do {n.SplatnostDni} dní odo dňa doručenia na účet Spoločenstva IBAN: ");
+                        t.Span(string.IsNullOrWhiteSpace(j.Iban) ? "................................" : Iban.Formatuj(j.Iban)).Bold();
+                        t.Span($", variabilný symbol {p.VariabilnySymbol ?? p.Cislo}.");
                         if (Iban.JePlatny(j.Iban)) t.Span(" Môžete zaplatiť aj naskenovaním QR kódu v mobilnej aplikácii banky.");
                     });
                     if (Iban.JePlatny(j.Iban))
                     {
                         row.ConstantItem(10);
-                        row.ConstantItem(90).Column(c =>
+                        row.ConstantItem(72).Column(c =>
                         {
                             c.Item().Image(PayBySquare.QrPng(new PlatbaQr(j.Iban!, Math.Abs(b.Vysledok), p.VariabilnySymbol ?? p.Cislo,
                                 Poznamka: $"Vyuctovanie {b.Rok} byt {p.Cislo}", Prijemca: j.Nazov)));
@@ -223,12 +245,12 @@ public static class PdfVyuctovanie
             else if (b.Vysledok > 0)
                 col.Item().Text("Preplatok vám bude vrátený na účet, z ktorého platíte zálohy, alebo započítaný podľa rozhodnutia spoločenstva.");
 
-            col.Item().PaddingTop(16).Row(row =>
+            col.Item().PaddingTop(8).Row(row =>
             {
                 row.RelativeItem().AlignBottom().Text($"{n.Miesto}, {Datum(n.DatumVystavenia)}");
                 row.RelativeItem().AlignRight().Column(c =>
                 {
-                    c.Item().PaddingTop(24).LineHorizontal(0.5f);
+                    c.Item().PaddingTop(20).LineHorizontal(0.5f);
                     c.Item().AlignCenter().Text(j.Statutar ?? "").Bold();
                     c.Item().AlignCenter().Text($"predseda {j.Nazov}").FontSize(7.5f);
                 });
@@ -247,7 +269,7 @@ public static class PdfVyuctovanie
         c.Border(0.5f).BorderColor(Ram).Background(Tlmene).PaddingVertical(2).PaddingHorizontal(3).AlignMiddle();
 
     internal static IContainer Bunka(IContainer c) =>
-        c.Border(0.5f).BorderColor(Ram).PaddingVertical(1.5f).PaddingHorizontal(3);
+        c.Border(0.5f).BorderColor(Ram).PaddingVertical(1.2f).PaddingHorizontal(3);
 }
 
 static class TextExtensions

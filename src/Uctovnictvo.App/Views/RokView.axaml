@@ -9,7 +9,7 @@
       <Button Command="{Binding PredpisyPdfCommand}">Evidenčné listy (PDF)…</Button>
       <Button Command="{Binding PredpisyEmailCommand}" IsEnabled="{Binding !Odosiela}">Poslať predpisy e-mailom…</Button>
     </StackPanel>
-    <TabControl>
+    <TabControl SelectionChanged="ZmenaZalozky">
       <TabItem Header="Predpisy záloh">
         <DockPanel>
           <Border DockPanel.Dock="Top" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,4,0,8">
@@ -24,25 +24,90 @@
               <Button Command="{Binding NastavPredpisHromadneCommand}">Nastaviť všetkým</Button>
             </StackPanel>
           </Border>
-          <TextBlock DockPanel.Dock="Bottom" Classes="popis" Margin="0,6,0,0" Text="Sumy sú ročné. Mesačná platba = súčet / 12. Poistné sa zadáva v záložke Odpočty vody a poistné." />
+          <TextBlock DockPanel.Dock="Bottom" Classes="popis" Margin="0,6,0,0" Text="Sumy sú ročné. Mesačná platba = súčet / 12. Poistné sa zadáva v záložke Poistné a preplatky z min. roku." />
           <DataGrid x:Name="Predpisy" ItemsSource="{Binding PredpisRiadky}" AutoGenerateColumns="False" FrozenColumnCount="2" />
         </DockPanel>
       </TabItem>
-      <TabItem Header="Odpočty vody a poistné">
+      <TabItem Header="Poistné a preplatky z min. roku">
         <DockPanel>
-          <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,4,0,8" Text="Dátum zadávajte v tvare 10.1.2025. Zostatok minulého roka: + preplatok, − nedoplatok (prevezme sa aj automaticky tlačidlom hore)." />
-          <DataGrid ItemsSource="{Binding RokRiadky}" AutoGenerateColumns="False" FrozenColumnCount="2">
+          <TextBlock DockPanel.Dock="Top" Classes="popis" Margin="0,4,0,8" Text="Zostatok z minulého roka: + preplatok, − nedoplatok (prevezme sa aj automaticky tlačidlom „Prevziať z minulého roka“)." />
+          <DataGrid ItemsSource="{Binding RokRiadky}" AutoGenerateColumns="False" FrozenColumnCount="2" HorizontalAlignment="Left" Width="720">
             <DataGrid.Columns>
               <DataGridTextColumn Header="Byt" Binding="{Binding Priestor.Cislo}" IsReadOnly="True" Width="64" />
-              <DataGridTextColumn Header="Vlastník" Binding="{Binding Priestor.MenaVlastnikov}" IsReadOnly="True" Width="200" />
-              <DataGridTextColumn Header="Odpočet od" Binding="{Binding DatumZaciatok, Converter={StaticResource Datum}}" Width="110" />
-              <DataGridTextColumn Header="Stav m³" Binding="{Binding StavZaciatok, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo" />
-              <DataGridTextColumn Header="Odpočet do" Binding="{Binding DatumKoniec, Converter={StaticResource Datum}}" Width="110" />
-              <DataGridTextColumn Header="Stav m³" Binding="{Binding StavKoniec, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo" />
-              <DataGridTextColumn Header="Starý vodomer m³" Binding="{Binding SpotrebaVymeneny, Converter={StaticResource M3}}" Width="130" CellStyleClasses="cislo" />
-              <DataGridTextColumn Header="Spotreba m³" Binding="{Binding Spotreba, Converter={StaticResource M3}}" IsReadOnly="True" Width="110" CellStyleClasses="cislo" />
-              <DataGridTextColumn Header="Poistné – predpis €" Binding="{Binding PoistnePredpis, Converter={StaticResource Eur}}" Width="150" CellStyleClasses="cislo" />
-              <DataGridTextColumn Header="Zostatok min. roka €" Binding="{Binding ZostatokMinulyRok, Converter={StaticResource Eur}}" Width="160" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Vlastník" Binding="{Binding Vlastnik}" IsReadOnly="True" Width="*" />
+              <DataGridTextColumn Header="Poistné – predpis €" Binding="{Binding PoistnePredpis, Converter={StaticResource Eur}}" Width="160" CellStyleClasses="cislo" />
+              <DataGridTextColumn Header="Zostatok z min. roku €" Binding="{Binding ZostatokMinulyRok, Converter={StaticResource Eur}}" Width="180" CellStyleClasses="cislo" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </DockPanel>
+      </TabItem>
+      <TabItem Header="Odpočty vody">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="8" Margin="0,4,0,6">
+            <Button Command="{Binding ImportOdpoctovVodyCommand}" ToolTip.Tip="Načíta stĺpce 2, 3, 7 a 8 (aj čísla vodomerov, dátumy a ceny) z Excelu podľa vzoru tlačiva">Import z Excelu…</Button>
+            <Button Command="{Binding ExportOdpoctovVodyCommand}" ToolTip.Tip="Tlačivo so všetkými bytmi na vyplnenie – dá sa naimportovať späť">Export tlačiva do Excelu…</Button>
+          </StackPanel>
+          <Border DockPanel.Dock="Top" Background="#F1F4F7" CornerRadius="4" Padding="10,6" Margin="0,0,0,8">
+            <Grid ColumnDefinitions="Auto,110,24,Auto,110,24,Auto,90,*" RowDefinitions="Auto,Auto">
+              <TextBlock Classes="stitok" Text="1. dátum odpočtu ku dňu" VerticalAlignment="Center" />
+              <TextBox Grid.Column="1" Text="{Binding VodaDatum1, Converter={StaticResource Datum}}" Margin="6,2" />
+              <TextBlock Grid.Row="1" Classes="stitok" Text="2. dátum odpočtu ku dňu" VerticalAlignment="Center" />
+              <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding VodaDatum2, Converter={StaticResource Datum}}" Margin="6,2" />
+              <TextBlock Grid.Column="3" Classes="stitok" Text="3. dátum odpočtu ku dňu" VerticalAlignment="Center" />
+              <TextBox Grid.Column="4" Text="{Binding VodaDatum3, Converter={StaticResource Datum}}" Margin="6,2" />
+              <TextBlock Grid.Row="1" Grid.Column="3" Classes="stitok" Text="4. dátum odpočtu ku dňu" VerticalAlignment="Center" />
+              <TextBox Grid.Row="1" Grid.Column="4" Text="{Binding VodaDatum4, Converter={StaticResource Datum}}" Margin="6,2" />
+              <TextBlock Grid.Column="6" Classes="stitok" Text="1. cena vodné a stočné za 1 m³ €" VerticalAlignment="Center" />
+              <TextBox Grid.Column="7" Text="{Binding VodaCena1, Converter={StaticResource Eur4}}" Margin="6,2" />
+              <TextBlock Grid.Row="1" Grid.Column="6" Classes="stitok" Text="2. cena vodné a stočné za 1 m³ €" VerticalAlignment="Center" />
+              <TextBox Grid.Row="1" Grid.Column="7" Text="{Binding VodaCena2, Converter={StaticResource Eur4}}" Margin="6,2" />
+            </Grid>
+          </Border>
+          <TextBlock DockPanel.Dock="Bottom" Classes="popis" Margin="0,6,0,0" TextWrapping="Wrap"
+                     Text="4 = 3 − 2,  5 = 4 × 1. cena,  9 = 8 − 7,  10 = 9 × 2. cena,  11 = predpis záloh v položke vodné a stočné,  12 = 5 + 10,  13 = 11 − 12 (− nedoplatok / + preplatok). Keď je zadaná cena, voda sa vo vyúčtovaní počíta podľa tohto tlačiva." />
+          <DataGrid x:Name="Odpocty" ItemsSource="{Binding RokRiadky}" AutoGenerateColumns="False" FrozenColumnCount="2">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Byt" Binding="{Binding Priestor.Cislo}" IsReadOnly="True" Width="66" />
+              <DataGridTextColumn Header="Meno" Binding="{Binding Vlastnik}" IsReadOnly="True" Width="170" />
+              <DataGridTextColumn Binding="{Binding Vodomer1}" Width="105">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="1. č. vodomeru" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Stav2, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="2. stav k 1. dátumu" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Stav3, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="3. stav k 2. dátumu" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Spotreba1, Converter={StaticResource M3}}" IsReadOnly="True" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="4. spotreba m³" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Cena1, Converter={StaticResource Eur}}" IsReadOnly="True" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="5. cena (1. cena) €" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Vodomer2}" Width="105">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="6. č. vodomeru výmena" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Stav7, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="7. stav k 3. dátumu" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Stav8, Converter={StaticResource M3Prazdne}}" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="8. stav k 4. dátumu" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Spotreba2, Converter={StaticResource M3}}" IsReadOnly="True" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="9. spotreba m³" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Cena2, Converter={StaticResource Eur}}" IsReadOnly="True" Width="100" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="10. cena (2. cena) €" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding Zaloha, Converter={StaticResource Eur}}" IsReadOnly="True" Width="105" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="11. zálohová platba €" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding VodaSpolu, Converter={StaticResource Eur}}" IsReadOnly="True" Width="115" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="12. voda za rok celkom €" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn Binding="{Binding VodaRozdiel, Converter={StaticResource Eur}}" IsReadOnly="True" Width="140" CellStyleClasses="cislo">
+                <DataGridTextColumn.Header><TextBlock TextWrapping="Wrap" FontSize="12" Text="13. − nedoplatok / + preplatok €" /></DataGridTextColumn.Header>
+              </DataGridTextColumn>
             </DataGrid.Columns>
           </DataGrid>
         </DockPanel>

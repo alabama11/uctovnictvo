@@ -16,6 +16,7 @@ public class AppDbContext : DbContext
     public DbSet<NakladRoka> NakladyRoka => Set<NakladRoka>();
     public DbSet<PredpisPolozky> Predpisy => Set<PredpisPolozky>();
     public DbSet<PriestorRok> PriestorRoky => Set<PriestorRok>();
+    public DbSet<VodaRoka> VodaRoky => Set<VodaRoka>();
     public DbSet<Uhrada> Uhrady => Set<Uhrada>();
     public DbSet<PohybFondu> PohybyFondu => Set<PohybFondu>();
     public DbSet<Nastavenie> Nastavenia => Set<Nastavenie>();
@@ -74,6 +75,15 @@ public class AppDbContext : DbContext
             e.ToTable("PriestorRoky");
             e.HasIndex(p => new { p.PriestorId, p.Rok }).IsUnique();
             e.Ignore(p => p.SpotrebaVody);
+            e.Ignore(p => p.Spotreba1);
+            e.Ignore(p => p.Spotreba2);
+            e.Ignore(p => p.KonecnyStav);
+        });
+        b.Entity<VodaRoka>(e =>
+        {
+            e.ToTable("VodaRoky");
+            e.HasIndex(v => new { v.JednotkaId, v.Rok }).IsUnique();
+            e.Ignore(v => v.PodlaCien);
         });
         b.Entity<Uhrada>(e =>
         {

@@ -30,7 +30,8 @@ public static class ImportExcel
         ("Podiel", "čitateľ spoluvlastníckeho podielu"),
         ("Z celku", "menovateľ podielu"),
         ("VS", "variabilný symbol"),
-        ("Vodomer", "číslo vodomeru"),
+        ("Vodomer", "číslo vodomeru 1"),
+        ("Vodomer 2", "číslo vodomeru 2 (výmena)"),
         ("Vlastník", "viac vlastníkov oddeľte bodkočiarkou"),
         ("Ulica", "adresa vlastníka"),
         ("Obec", ""),
@@ -61,7 +62,7 @@ public static class ImportExcel
             object?[] hodnoty =
             {
                 p.Cislo, p.Typ == TypPriestoru.Byt ? "byt" : "nebytový", p.Vchod, p.Poschodie, p.Plocha, p.PlochaBalkona, p.PocetOsob,
-                p.PodielCitatel, p.PodielMenovatel, p.VariabilnySymbol, p.CisloVodomeru,
+                p.PodielCitatel, p.PodielMenovatel, p.VariabilnySymbol, p.CisloVodomeru, p.CisloVodomeru2,
                 string.Join("; ", v.Select(x => x.Meno)), v.FirstOrDefault()?.Ulica, v.FirstOrDefault()?.Obec, v.FirstOrDefault()?.Psc,
                 string.Join("; ", v.Select(x => x.Email).Where(e => !string.IsNullOrWhiteSpace(e))),
                 v.FirstOrDefault()?.Telefon,
@@ -161,7 +162,8 @@ public static class ImportExcel
             else if (Cislo("Podiel") is { } citatel) p.PodielCitatel = (int)citatel;
             if (Cislo("Z celku", "Menovateľ") is { } menovatel) p.PodielMenovatel = (int)menovatel;
             if (Text("VS", "Variabilný symbol") is { } vs) p.VariabilnySymbol = vs;
-            if (Text("Vodomer", "Číslo vodomeru") is { } vodomer) p.CisloVodomeru = vodomer;
+            if (Text("Vodomer", "Číslo vodomeru", "Vodomer 1", "Číslo vodomeru 1") is { } vodomer) p.CisloVodomeru = vodomer;
+            if (Text("Vodomer 2", "Číslo vodomeru 2") is { } vodomer2) p.CisloVodomeru2 = vodomer2;
 
             if (Text("Vlastník", "Vlastníci", "Meno") is { } mena)
             {

@@ -36,7 +36,7 @@ public class KontoTests
 public class ZmenaVlastnikaTests
 {
     [Fact]
-    public void Predaj_bytu_rozdeli_vyuctovanie_podla_dni()
+    public void Predaj_bytu_rozdeli_vyuctovanie_podla_mesiacov()
     {
         var (byty, kat) = Vzor.Dom();
         var b3 = byty[2];
@@ -50,7 +50,7 @@ public class ZmenaVlastnikaTests
         Assert.Equal("PaedDr. Patrik Voštinár PhD.", casti[0].Vlastnik);
         Assert.Equal("Nový Vlastník", casti[1].Vlastnik);
         Assert.Equal(new DateOnly(2025, 6, 30), casti[0].ObdobieDo);
-        // 181 + 184 dní: súčet častí sa od celoročného líši najviac o zaokrúhlenie
+        // 6 + 6 mesiacov: súčet častí sa od celoročného líši najviac o zaokrúhlenie
         Assert.InRange(casti.Sum(c => c.SkutocneSpolu), 975.25m - 0.10m, 975.25m + 0.10m);
         // úhrady sa delia podľa dátumu, poistné a minulý rok patria prvému vlastníkovi
         Assert.Equal(6 * 65m - 27.02m, casti[0].ZaplateneZalohy);
