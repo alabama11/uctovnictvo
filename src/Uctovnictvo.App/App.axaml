@@ -5,6 +5,7 @@
              RequestedThemeVariant="Light">
   <Application.Resources>
     <k:DesatinnyPrevodnik x:Key="Eur" Miesta="2" />
+    <k:DesatinnyPrevodnik x:Key="Eur4" Miesta="4" />
     <k:DesatinnyPrevodnik x:Key="M3" Miesta="3" />
     <k:DesatinnyPrevodnik x:Key="M3Prazdne" Miesta="3" PovolitPrazdne="True" />
     <k:DatumPrevodnik x:Key="Datum" />

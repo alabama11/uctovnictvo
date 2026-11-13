@@ -19,6 +19,14 @@ AppBuilder.Configure<Uctovnictvo.App.App>()
 
 var vm = new MainViewModel(db) { Rok = 2025 };
 vm.VytvorUkazkuCommand.Execute(null);
+// spoluvlastník a predaj bytu na ukážku
+var byt1 = vm.Priestory.First();
+byt1.Vlastnici[0].SpoluvlastnickyPodiel = "1/2";
+byt1.Vlastnici.Add(new Uctovnictvo.Core.Model.Vlastnik { Meno = "Peter Spoluvlastník", SpoluvlastnickyPodiel = "1/2", Hlavny = false });
+vm.VybranyPriestor = null; vm.VybranyPriestor = byt1;
+vm.VodaDatum1 = new DateOnly(2025, 1, 10); vm.VodaDatum2 = new DateOnly(2025, 8, 15);
+vm.VodaDatum3 = new DateOnly(2025, 8, 15); vm.VodaDatum4 = new DateOnly(2026, 1, 10);
+vm.VodaCena1 = 3.84m; vm.VodaCena2 = 4.10m;
 var w = new MainWindow { DataContext = vm, Width = 1320, Height = 820 };
 w.Show();
 
@@ -43,8 +51,27 @@ foreach (var (tab, subor) in mena)
 zalozky.SelectedIndex = Index("Predpisy a odpočty");
 Dispatcher.UIThread.RunJobs();
 var vnorene = w.GetVisualDescendantsOfType<TabControl>().First(t => t != zalozky);
-vnorene.SelectedIndex = 1; Snimka("4b-odpocty");
-vnorene.SelectedIndex = 2; Snimka("4c-naklady");
+vnorene.SelectedIndex = 1; Snimka("4b-poistne");
+vnorene.SelectedIndex = 2; Snimka("4c-odpocty-vody");
+vnorene.SelectedIndex = 3; Snimka("4d-naklady");
+// import výpisu s platbou bez VS
+{
+    var platby = new[]
+    {
+        new Uctovnictvo.Core.Services.PlatbaZVypisu(new DateOnly(2025, 3, 5), 65m, "SK3112000000198742637541", "Mária Nováková", "1", null),
+        new Uctovnictvo.Core.Services.PlatbaZVypisu(new DateOnly(2025, 3, 7), 80m, "SK0809000000000123123123", "Neznámy platiteľ", null, "zaloha"),
+    };
+    var riadky = Uctovnictvo.Core.Services.ImportBanky.Paruj(platby, vm.Priestory.ToList()).Select(p => new ImportRiadok(p, false)).ToList();
+    var iw = new ImportWindow(riadky, vm.Priestory.ToList()) { Width = 1150, Height = 400 };
+    iw.Show();
+    Dispatcher.UIThread.RunJobs();
+    for (int i = 0; i < 3; i++) { AvaloniaHeadlessPlatform.ForceRenderTimerTick(); Dispatcher.UIThread.RunJobs(); }
+    riadky[1].Vs = "3";
+    Dispatcher.UIThread.RunJobs();
+    Console.WriteLine($"kontrola importu: {riadky[0].Priestor?.Cislo} / {riadky[1].Priestor?.Cislo} {riadky[1].Importovat}");
+    iw.CaptureRenderedFrame()!.Save(Path.Combine(vystup, "5b-import-vypisu.png"));
+    iw.Close();
+}
 // firma
 vm.VybranaJednotka = vm.Jednotky.First(j => j.Typ != Uctovnictvo.Core.Model.TypJednotky.Spolocenstvo);
 Dispatcher.UIThread.RunJobs();

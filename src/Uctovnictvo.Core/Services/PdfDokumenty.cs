@@ -209,8 +209,6 @@ public static class PdfDokumenty
 
     public static void PrezencnaListina(UctovnaJednotka j, IReadOnlyList<Priestor> priestory, DateOnly datumSchodze, string path)
     {
-        var spoluPodiel = priestory.Sum(p => p.PodielMenovatel > 0 ? (decimal)p.PodielCitatel / p.PodielMenovatel : 0m);
-        var spoluPlocha = priestory.Sum(p => p.Plocha);
         Document.Create(doc => doc.Page(page =>
         {
             page.Size(PageSizes.A4);
@@ -220,25 +218,34 @@ public static class PdfDokumenty
             {
                 col.Item().Text(j.Nazov).Bold().FontSize(12);
                 col.Item().Text($"Prezenčná listina – schôdza vlastníkov dňa {Datum(datumSchodze)}").Bold().FontSize(11);
-                col.Item().PaddingBottom(6).Text("Hlas = spoluvlastnícky podiel na spoločných častiach (ak nie je zadaný, podiel plochy).").FontSize(7.5f).Italic();
+                col.Item().PaddingBottom(6).Text("Jeden byt = jeden hlas").Bold().FontSize(10);
             });
             page.Content().Table(t =>
             {
-                t.ColumnsDefinition(c => { c.ConstantColumn(40); c.RelativeColumn(3); c.ConstantColumn(60); c.ConstantColumn(55); c.RelativeColumn(2); });
+                t.ColumnsDefinition(c => { c.ConstantColumn(40); c.RelativeColumn(3); c.RelativeColumn(2); });
                 t.Header(h =>
                 {
-                    foreach (var s in new[] { "byt", "vlastník", "podiel", "hlas %", "podpis / splnomocnenec" })
+                    foreach (var s in new[] { "byt", "vlastník / spoluvlastníci (spoluvlastnícky podiel)", "podpis / splnomocnenec" })
                         h.Cell().Element(PdfVyuctovanie.Hlavicka).Text(s).Bold();
                 });
                 foreach (var p in priestory.OrderBy(p => p.Cislo, CisloComparer.Instance))
                 {
-                    var hlas = spoluPodiel > 0 && p.PodielMenovatel > 0 ? (decimal)p.PodielCitatel / p.PodielMenovatel / spoluPodiel
-                        : spoluPlocha > 0 ? p.Plocha / spoluPlocha : 0m;
-                    t.Cell().Element(Bunka).PaddingVertical(5).Text(p.Cislo);
-                    t.Cell().Element(Bunka).PaddingVertical(5).Text(p.MenaVlastnikov);
-                    t.Cell().Element(Bunka).PaddingVertical(5).Text(p.PodielMenovatel > 0 ? $"{p.PodielCitatel}/{p.PodielMenovatel}" : "");
-                    t.Cell().Element(Bunka).PaddingVertical(5).AlignRight().Text((hlas * 100).ToString("N2", Sk));
-                    t.Cell().Element(Bunka).PaddingVertical(5).Text("");
+                    var vlastnici = p.VlastniciKu(datumSchodze);
+                    if (vlastnici.Count == 0) vlastnici = p.SucasniVlastnici.ToList();
+                    // každý spoluvlastník má vlastný riadok na podpis, byt má spolu jeden hlas
+                    var n = (uint)Math.Max(1, vlastnici.Count);
+                    t.Cell().RowSpan(n).Element(Bunka).PaddingVertical(5).Text(p.Cislo);
+                    if (vlastnici.Count == 0)
+                    {
+                        t.Cell().Element(Bunka).PaddingVertical(5).Text("");
+                        t.Cell().Element(Bunka).PaddingVertical(5).Text("");
+                    }
+                    foreach (var v in vlastnici)
+                    {
+                        t.Cell().Element(Bunka).PaddingVertical(5).Text(vlastnici.Count > 1 && !string.IsNullOrWhiteSpace(v.SpoluvlastnickyPodiel)
+                            ? $"{v.Meno} (spoluvlastnícky podiel {v.SpoluvlastnickyPodiel.Trim()})" : v.Meno);
+                        t.Cell().Element(Bunka).PaddingVertical(5).Text("");
+                    }
                 }
             });
             page.Footer().AlignRight().Text(t => { t.Span("strana "); t.CurrentPageNumber(); t.Span(" / "); t.TotalPages(); });

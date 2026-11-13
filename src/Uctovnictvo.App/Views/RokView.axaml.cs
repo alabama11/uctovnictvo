@@ -20,6 +20,11 @@ public partial class RokView : UserControl
         };
     }
 
+    void ZmenaZalozky(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.Source is TabControl) vm?.ObnovOdpocty();
+    }
+
     /// <summary>Stĺpec pre každú položku nákladov – menia sa podľa nastavenia spoločenstva.</summary>
     void PostavStlpce()
     {

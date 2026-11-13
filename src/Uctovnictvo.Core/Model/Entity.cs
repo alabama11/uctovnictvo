@@ -85,7 +85,10 @@ public class Priestor
     public int PodielMenovatel { get; set; }
     /// <summary>Variabilný symbol pre platby za tento priestor (zvyčajne číslo bytu).</summary>
     public string? VariabilnySymbol { get; set; }
+    /// <summary>Číslo vodomeru 1 (pôvodný).</summary>
     public string? CisloVodomeru { get; set; }
+    /// <summary>Číslo vodomeru 2 – nový vodomer po výmene počas roka.</summary>
+    public string? CisloVodomeru2 { get; set; }
     public string? Poznamka { get; set; }
 
     public List<Vlastnik> Vlastnici { get; set; } = new();
@@ -99,6 +102,10 @@ public class Priestor
     public IEnumerable<Vlastnik> SucasniVlastnici =>
         Vlastnici.Where(v => v.VlastnikDo is null || v.VlastnikDo >= DateOnly.FromDateTime(DateTime.Today))
             .OrderByDescending(v => v.Hlavny).ThenBy(v => v.Id);
+
+    /// <summary>Vlastníci a spoluvlastníci (bez kontaktných osôb, ktoré nie sú vlastníkmi) k danému dňu.</summary>
+    public List<Vlastnik> VlastniciKu(DateOnly den) =>
+        Vlastnici.Where(v => v.JeVlastnik && v.JeVlastnikom(den)).OrderByDescending(v => v.Hlavny).ThenBy(v => v.Id).ToList();
 }
 
 public class Vlastnik
@@ -115,6 +122,10 @@ public class Vlastnik
     public string? Telefon { get; set; }
     /// <summary>Kontaktná osoba, ktorej sa posiela vyúčtovanie.</summary>
     public bool Hlavny { get; set; } = true;
+    /// <summary>Je vlastníkom alebo spoluvlastníkom bytu (nezaškrtnuté = len kontaktná osoba, napr. nájomca alebo príbuzný).</summary>
+    public bool JeVlastnik { get; set; } = true;
+    /// <summary>Spoluvlastnícky podiel na byte, napr. „1/2“ (prázdne = jediný vlastník).</summary>
+    public string? SpoluvlastnickyPodiel { get; set; }
     /// <summary>Od kedy je vlastníkom (prázdne = odjakživa). Pri predaji bytu sa vyúčtovanie delí podľa týchto dátumov.</summary>
     public DateOnly? VlastnikOd { get; set; }
     /// <summary>Do kedy bol vlastníkom (prázdne = stále je).</summary>
@@ -190,8 +201,12 @@ public class PriestorRok
     public decimal? StavVodomeruZaciatok { get; set; }
     public DateOnly? DatumOdpoctuKoniec { get; set; }
     public decimal? StavVodomeruKoniec { get; set; }
-    /// <summary>Spotreba nameraná na starom vodomere, ak sa počas roka menil (m³).</summary>
+    /// <summary>Spotreba nameraná na starom vodomere, ak sa počas roka menil (m³) – staršie údaje, nový spôsob je vodomer 2.</summary>
     public decimal SpotrebaVymenenyVodomer { get; set; }
+    /// <summary>Druhé obdobie (po zmene ceny alebo výmene vodomeru): stav k 3. dátumu odpočtu (stĺpec 7 tlačiva).</summary>
+    public decimal? StavVodomeru2Zaciatok { get; set; }
+    /// <summary>Stav k 4. dátumu odpočtu (stĺpec 8 tlačiva).</summary>
+    public decimal? StavVodomeru2Koniec { get; set; }
 
     /// <summary>Predpis ročného poistenia bytu.</summary>
     public decimal PoistnePredpis { get; set; }
@@ -199,8 +214,36 @@ public class PriestorRok
     /// <summary>Výsledok vyúčtovania minulého roka: + preplatok, − nedoplatok.</summary>
     public decimal ZostatokMinulyRok { get; set; }
 
-    public decimal SpotrebaVody =>
-        (StavVodomeruZaciatok is { } z && StavVodomeruKoniec is { } k ? k - z : 0m) + SpotrebaVymenenyVodomer;
+    /// <summary>Spotreba v 1. období (stĺpec 4 = 3 − 2).</summary>
+    public decimal Spotreba1 => StavVodomeruZaciatok is { } z && StavVodomeruKoniec is { } k ? k - z : 0m;
+    /// <summary>Spotreba v 2. období (stĺpec 9 = 8 − 7).</summary>
+    public decimal Spotreba2 => StavVodomeru2Zaciatok is { } z && StavVodomeru2Koniec is { } k ? k - z : 0m;
+
+    public decimal SpotrebaVody => Spotreba1 + Spotreba2 + SpotrebaVymenenyVodomer;
+
+    /// <summary>Posledný známy stav vodomeru (na prevzatie do ďalšieho roka).</summary>
+    public decimal? KonecnyStav => StavVodomeru2Koniec ?? StavVodomeruKoniec;
+}
+
+/// <summary>
+/// Hlavička tlačiva odpočtov vody za rok: štyri dátumy odpočtu a dve ceny vodného a stočného za 1 m³
+/// (1. cena platí pre stavy k 1. a 2. dátumu, 2. cena pre stavy k 3. a 4. dátumu).
+/// </summary>
+public class VodaRoka
+{
+    public int Id { get; set; }
+    public int JednotkaId { get; set; }
+    public UctovnaJednotka? Jednotka { get; set; }
+    public int Rok { get; set; }
+    public DateOnly? Datum1 { get; set; }
+    public DateOnly? Datum2 { get; set; }
+    public DateOnly? Datum3 { get; set; }
+    public DateOnly? Datum4 { get; set; }
+    public decimal Cena1 { get; set; }
+    public decimal Cena2 { get; set; }
+
+    /// <summary>Ceny sú zadané – voda sa vyúčtuje podľa tlačiva (spotreba × cena), nie rozpočítaním faktúry domu.</summary>
+    public bool PodlaCien => Cena1 > 0 || Cena2 > 0;
 }
 
 public class Uhrada

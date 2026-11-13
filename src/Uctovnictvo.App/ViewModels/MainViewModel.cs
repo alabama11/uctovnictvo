@@ -168,6 +168,7 @@ public partial class MainViewModel : ObservableObject
         Upozornenia.Clear();
         SumaVyuctovania = "";
         NacitajCast2();
+        NacitajVoduRoka();
         if (!JeSpolocenstvo)
         {
             Uhrady.Clear();
@@ -178,7 +179,7 @@ public partial class MainViewModel : ObservableObject
         foreach (var p in Priestory)
         {
             PredpisRiadky.Add(new PredpisRiadok(db, p, Kategorie, Rok));
-            RokRiadky.Add(new RokRiadok(p, ZabezpecRok(p, Rok)));
+            RokRiadky.Add(NovyRokRiadok(p));
         }
         foreach (var k in Kategorie)
             NakladRiadky.Add(new NakladRiadok(db, k, Rok));
@@ -313,7 +314,7 @@ public partial class MainViewModel : ObservableObject
         Priestory.Add(p);
         VybranyPriestor = p;
         PredpisRiadky.Add(new PredpisRiadok(db, p, Kategorie, Rok));
-        RokRiadky.Add(new RokRiadok(p, ZabezpecRok(p, Rok)));
+        RokRiadky.Add(NovyRokRiadok(p));
     }
 
     [RelayCommand]
@@ -447,7 +448,8 @@ public partial class MainViewModel : ObservableObject
                 $"Pre rok {Rok} sa prevezme z roka {minuly}:\n• predpisy záloh a poistného (ak v roku {Rok} ešte nie sú zadané),\n• konečný stav vodomeru ako počiatočný stav,\n• výsledok vyúčtovania {minuly} ako zostatok minulého roka.\n\nPokračovať?"))
             return;
 
-        var vysledokMinuly = Vyuctovanie.Vypocitaj(minuly, Priestory.ToList(), Kategorie.ToList());
+        var vysledokMinuly = Vyuctovanie.Vypocitaj(minuly, Priestory.ToList(), Kategorie.ToList(),
+            db.VodaRoky.FirstOrDefault(v => v.JednotkaId == VybranaJednotka!.Id && v.Rok == minuly));
         foreach (var p in Priestory)
         {
             var teraz = ZabezpecRok(p, Rok);
@@ -462,11 +464,18 @@ public partial class MainViewModel : ObservableObject
             if (predtym is not null)
             {
                 if (teraz.PoistnePredpis == 0) teraz.PoistnePredpis = predtym.PoistnePredpis;
-                teraz.StavVodomeruZaciatok ??= predtym.StavVodomeruKoniec;
+                teraz.StavVodomeruZaciatok ??= predtym.KonecnyStav;
                 teraz.DatumOdpoctuZaciatok ??= predtym.DatumOdpoctuKoniec;
             }
             var b = vysledokMinuly.Byty.FirstOrDefault(x => x.Priestor == p);
             if (b is not null && teraz.ZostatokMinulyRok == 0) teraz.ZostatokMinulyRok = b.Vysledok;
+        }
+        var vodaMinuly = db.VodaRoky.FirstOrDefault(v => v.JednotkaId == VybranaJednotka!.Id && v.Rok == minuly);
+        if (vodaMinuly is not null)
+        {
+            var v = ZabezpecVoduRoka();
+            v.Datum1 ??= vodaMinuly.Datum4 ?? vodaMinuly.Datum2;
+            if (v.Cena1 == 0) v.Cena1 = vodaMinuly.Cena2 > 0 ? vodaMinuly.Cena2 : vodaMinuly.Cena1;
         }
         Uloz();
         NacitajRok();
@@ -524,7 +533,13 @@ public partial class MainViewModel : ObservableObject
         }
 
         var parovane = ImportBanky.Paruj(platby, Priestory.ToList());
-        var riadky = parovane.Select(p => new ImportRiadok(p, JeDuplicitna(p.Platba))).ToList();
+        Priestor? PodlaVs(string vs)
+        {
+            var k = vs.TrimStart('0');
+            var zhoda = Priestory.Where(x => (x.VariabilnySymbol ?? x.Cislo).Trim().TrimStart('0') == k).ToList();
+            return zhoda.Count == 1 ? zhoda[0] : null;
+        }
+        var riadky = parovane.Select(p => new ImportRiadok(p, JeDuplicitna(p.Platba), PodlaVs)).ToList();
         if (!await Dialogy.ImportPlatieb(riadky, Priestory.ToList())) return;
 
         int pocet = 0;
@@ -533,7 +548,7 @@ public partial class MainViewModel : ObservableObject
             var u = new Uhrada
             {
                 Priestor = r.Priestor, Datum = r.Platba.Datum, Suma = r.Platba.Suma, Ucel = r.Ucel,
-                IbanPlatitela = r.Platba.Iban, VariabilnySymbol = r.Platba.VariabilnySymbol,
+                IbanPlatitela = r.Platba.Iban, VariabilnySymbol = string.IsNullOrWhiteSpace(r.Vs) ? null : r.Vs.Trim(),
                 Poznamka = string.Join(" ", new[] { r.Platba.Meno, r.Platba.Sprava }.Where(s => !string.IsNullOrWhiteSpace(s))),
             };
             r.Priestor!.Uhrady.Add(u);
@@ -554,7 +569,7 @@ public partial class MainViewModel : ObservableObject
     void Vypocitaj()
     {
         Uloz();
-        var v = Vyuctovanie.Vypocitaj(Rok, Priestory.ToList(), Kategorie.ToList());
+        var v = Vyuctovanie.Vypocitaj(Rok, Priestory.ToList(), Kategorie.ToList(), vodaRoku);
         VyuctovanieBytov.Clear();
         foreach (var b in v.Byty) VyuctovanieBytov.Add(b);
         Upozornenia.Clear();
